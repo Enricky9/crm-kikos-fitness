@@ -1,6 +1,7 @@
 import { buildServer } from "./app/server.js";
+import { env } from "./shared/config/env.js";
 
-const port = Number(process.env.PORT ?? 3333);
+const port = env.PORT;
 const host = "0.0.0.0";
 
 const server = await buildServer();
