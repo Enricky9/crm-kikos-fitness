@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { AuthenticatedUser, DealDto, DealStatus } from "@kikos/shared";
 
 import { buildServer } from "../../../app/server.js";
+import { LeadNotFoundError, SellerNotFoundError } from "../../../shared/errors/app-error.js";
 import type { UserRecord, UserRepository } from "../../users/application/user-repository.js";
 import type { DealListResult, DealRepository } from "../application/deal-repository.js";
 
@@ -132,6 +133,11 @@ const createDealRepository = (initialDeal: DealDto = demoDeal): DealRepository =
     )
 });
 
+const createDealRepositoryWithCreateError = (error: Error): DealRepository => ({
+  ...createDealRepository(),
+  create: () => Promise.reject(error)
+});
+
 const canUserSeeDeal = (user: AuthenticatedUser, deal: DealDto) =>
   user.role === "ADMIN" || user.id === deal.sellerId;
 
@@ -190,6 +196,83 @@ describe("deal routes", () => {
         title: "Nova sala cardio",
         value: "12000.00",
         status: "NEW"
+      }
+    });
+  });
+
+  it("rejects deal creation when lead does not exist", async () => {
+    const { server, authorization } = await buildAuthenticatedServer(
+      undefined,
+      createDealRepositoryWithCreateError(new LeadNotFoundError())
+    );
+
+    const response = await server.inject({
+      method: "POST",
+      url: "/api/v1/deals",
+      headers: { authorization },
+      payload: {
+        title: "Nova sala cardio",
+        value: 12000,
+        status: "NEW",
+        leadId: demoDeal.leadId,
+        sellerId: sellerUser.id
+      }
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({
+      error: {
+        code: "LEAD_NOT_FOUND",
+        message: "Lead nao encontrado",
+        details: null
+      }
+    });
+  });
+
+  it("rejects deal creation when seller does not exist", async () => {
+    const { server, authorization } = await buildAuthenticatedServer(
+      undefined,
+      createDealRepositoryWithCreateError(new SellerNotFoundError())
+    );
+
+    const response = await server.inject({
+      method: "POST",
+      url: "/api/v1/deals",
+      headers: { authorization },
+      payload: {
+        title: "Nova sala cardio",
+        value: 12000,
+        status: "NEW",
+        leadId: demoDeal.leadId,
+        sellerId: sellerUser.id
+      }
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({
+      error: {
+        code: "SELLER_NOT_FOUND",
+        message: "Vendedor nao encontrado",
+        details: null
+      }
+    });
+  });
+
+  it("returns deal details with comments and status history", async () => {
+    const { server, authorization } = await buildAuthenticatedServer();
+
+    const response = await server.inject({
+      method: "GET",
+      url: `/api/v1/deals/${demoDeal.id}`,
+      headers: { authorization }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      deal: {
+        ...demoDeal,
+        comments: [],
+        statusHistory: []
       }
     });
   });
@@ -257,6 +340,23 @@ describe("deal routes", () => {
     });
   });
 
+  it("marks a deal as won", async () => {
+    const { server, authorization } = await buildAuthenticatedServer();
+
+    const response = await server.inject({
+      method: "POST",
+      url: `/api/v1/deals/${demoDeal.id}/win`,
+      headers: { authorization }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      deal: {
+        status: "WON"
+      }
+    });
+  });
+
   it("reopens a closed deal", async () => {
     const { server, authorization } = await buildAuthenticatedServer(undefined, createDealRepository(withStatus("LOST")));
 
@@ -271,6 +371,23 @@ describe("deal routes", () => {
       deal: {
         status: "IN_PROGRESS",
         closedAt: null
+      }
+    });
+  });
+
+  it("rejects reopening an open deal", async () => {
+    const { server, authorization } = await buildAuthenticatedServer();
+
+    const response = await server.inject({
+      method: "POST",
+      url: `/api/v1/deals/${demoDeal.id}/reopen`,
+      headers: { authorization }
+    });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "INVALID_DEAL_TRANSITION"
       }
     });
   });
