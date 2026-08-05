@@ -23,6 +23,12 @@ export class UnauthorizedError extends AppError {
   }
 }
 
+export class LeadNotFoundError extends AppError {
+  constructor() {
+    super("LEAD_NOT_FOUND", "Lead nao encontrado", 404);
+  }
+}
+
 export class ValidationError extends AppError {
   constructor(details: unknown = null) {
     super("VALIDATION_ERROR", "Dados invalidos", 422, details);

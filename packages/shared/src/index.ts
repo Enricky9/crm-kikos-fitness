@@ -53,3 +53,48 @@ export const authenticatedUserSchema = z.object({
   role: userRoleSchema
 });
 export type AuthenticatedUser = z.infer<typeof authenticatedUserSchema>;
+
+export const leadSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  email: z.string().email().nullable(),
+  phone: z.string(),
+  company: z.string().nullable(),
+  source: z.string().nullable(),
+  dealsCount: z.number().int().nonnegative(),
+  createdAt: z.string(),
+  updatedAt: z.string()
+});
+export type LeadDto = z.infer<typeof leadSchema>;
+
+export const createLeadSchema = z.object({
+  name: z.string().trim().min(1),
+  email: z.string().trim().email().optional().nullable(),
+  phone: z.string().trim().min(8),
+  company: z.string().trim().min(1).optional().nullable(),
+  source: z.string().trim().min(1).optional().nullable()
+});
+export type CreateLeadDto = z.infer<typeof createLeadSchema>;
+
+export const updateLeadSchema = createLeadSchema.partial().refine((value) => Object.keys(value).length > 0, {
+  message: "Informe ao menos um campo para atualizar"
+});
+export type UpdateLeadDto = z.infer<typeof updateLeadSchema>;
+
+export const leadListQuerySchema = paginationQuerySchema.extend({
+  search: z.string().trim().optional(),
+  sortBy: z.enum(["name", "createdAt"]).default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc")
+});
+export type LeadListQuery = z.infer<typeof leadListQuerySchema>;
+
+export const paginatedLeadsSchema = z.object({
+  data: z.array(leadSchema),
+  pagination: z.object({
+    page: z.number().int().positive(),
+    pageSize: z.number().int().positive(),
+    total: z.number().int().nonnegative(),
+    totalPages: z.number().int().nonnegative()
+  })
+});
+export type PaginatedLeadsDto = z.infer<typeof paginatedLeadsSchema>;

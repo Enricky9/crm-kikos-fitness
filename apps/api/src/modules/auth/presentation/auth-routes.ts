@@ -3,25 +3,14 @@ import type { FastifyPluginAsync } from "fastify";
 import { Effect, Either } from "effect";
 import { z } from "zod";
 
-import { UnauthorizedError, ValidationError } from "../../../shared/errors/app-error.js";
+import { ValidationError } from "../../../shared/errors/app-error.js";
 import type { AuthService } from "../application/auth-service.js";
+import { authenticateRequest } from "./authenticate-request.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1)
 });
-
-type JwtPayload = {
-  readonly sub: string;
-};
-
-const getBearerToken = (authorizationHeader: string | undefined) => {
-  if (!authorizationHeader?.startsWith("Bearer ")) {
-    throw new UnauthorizedError();
-  }
-
-  return authorizationHeader.slice("Bearer ".length);
-};
 
 type AuthRoutesOptions = {
   readonly authService: AuthService;
@@ -61,21 +50,8 @@ export const registerAuthRoutes: FastifyPluginAsync<AuthRoutesOptions> = async (
   });
 
   server.get("/me", async (request, reply) => {
-    const token = getBearerToken(request.headers.authorization);
-    let payload: JwtPayload;
+    const user = await authenticateRequest(server, request, authService);
 
-    try {
-      payload = server.jwt.verify<JwtPayload>(token);
-    } catch {
-      throw new UnauthorizedError();
-    }
-
-    const userResult = await Effect.runPromise(Effect.either(authService.getAuthenticatedUser(payload.sub)));
-
-    if (Either.isLeft(userResult)) {
-      throw userResult.left;
-    }
-
-    return reply.send({ user: userResult.right });
+    return reply.send({ user });
   });
 };

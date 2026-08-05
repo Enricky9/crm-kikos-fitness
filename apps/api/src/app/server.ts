@@ -5,6 +5,10 @@ import Fastify from "fastify";
 
 import { createAuthService } from "../modules/auth/application/auth-service.js";
 import { registerAuthRoutes } from "../modules/auth/presentation/auth-routes.js";
+import { createLeadService } from "../modules/leads/application/lead-service.js";
+import type { LeadRepository } from "../modules/leads/application/lead-repository.js";
+import { createSequelizeLeadRepository } from "../modules/leads/infrastructure/sequelize-lead-repository.js";
+import { registerLeadRoutes } from "../modules/leads/presentation/lead-routes.js";
 import type { UserRepository } from "../modules/users/application/user-repository.js";
 import { createSequelizeUserRepository } from "../modules/users/infrastructure/sequelize-user-repository.js";
 import { env } from "../shared/config/env.js";
@@ -12,6 +16,7 @@ import { registerErrorHandler } from "../shared/http/error-handler.js";
 
 type BuildServerOptions = {
   readonly userRepository?: UserRepository;
+  readonly leadRepository?: LeadRepository;
 };
 
 export const buildServer = async (options: BuildServerOptions = {}) => {
@@ -41,13 +46,20 @@ export const buildServer = async (options: BuildServerOptions = {}) => {
   }));
 
   const userRepository = options.userRepository ?? createSequelizeUserRepository();
+  const leadRepository = options.leadRepository ?? createSequelizeLeadRepository();
   const authService = createAuthService(userRepository);
+  const leadService = createLeadService(leadRepository);
 
   await server.register(
     async (apiRoutes) => {
       await apiRoutes.register(registerAuthRoutes, {
         prefix: "/auth",
         authService
+      });
+      await apiRoutes.register(registerLeadRoutes, {
+        prefix: "/leads",
+        authService,
+        leadService
       });
     },
     { prefix: "/api/v1" }
