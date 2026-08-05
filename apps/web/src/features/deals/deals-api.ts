@@ -1,4 +1,11 @@
-import type { ChangeDealStatusDto, DealDto, DealListQuery, DealStatus } from "@kikos/shared";
+import type {
+  ChangeDealStatusDto,
+  CommentDto,
+  CreateCommentDto,
+  DealDetailsDto,
+  DealDto,
+  DealListQuery
+} from "@kikos/shared";
 
 import { apiRequest } from "../../api/http";
 
@@ -46,6 +53,9 @@ const toQueryString = (query: Partial<DealListQuery>) => {
 export const listDealsRequest = (token: string, query: Partial<DealListQuery> = {}) =>
   apiRequest<PaginatedDealsDto>(`/deals${toQueryString(query)}`, { token });
 
+export const getDealRequest = (token: string, dealId: string) =>
+  apiRequest<{ deal: DealDetailsDto }>(`/deals/${dealId}`, { token });
+
 export const changeDealStatusRequest = (token: string, dealId: string, input: ChangeDealStatusDto) =>
   apiRequest<{ deal: DealDto }>(`/deals/${dealId}/status`, {
     method: "PATCH",
@@ -66,8 +76,18 @@ export const loseDealRequest = (token: string, dealId: string, reason?: string) 
     token
   });
 
-export const statusQuery = (status: DealStatus) => ({
-  page: 1,
-  pageSize: 100,
-  status
-});
+export const reopenDealRequest = (token: string, dealId: string) =>
+  apiRequest<{ deal: DealDto }>(`/deals/${dealId}/reopen`, {
+    method: "POST",
+    token
+  });
+
+export const listDealCommentsRequest = (token: string, dealId: string) =>
+  apiRequest<{ comments: readonly CommentDto[] }>(`/deals/${dealId}/comments`, { token });
+
+export const createDealCommentRequest = (token: string, dealId: string, input: CreateCommentDto) =>
+  apiRequest<{ comment: CommentDto }>(`/deals/${dealId}/comments`, {
+    method: "POST",
+    body: input,
+    token
+  });
