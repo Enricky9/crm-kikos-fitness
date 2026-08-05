@@ -16,6 +16,7 @@ import {
 import { Link as RouterLink, Route, Routes, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
+import { CreateDealPage } from "../features/deals/CreateDealPage";
 import { DealBoardPage } from "../features/deals/DealBoardPage";
 import { DealDetailsPage } from "../features/deals/DealDetailsPage";
 import { CreateLeadPage } from "../features/leads/CreateLeadPage";
@@ -76,7 +77,7 @@ export const AppShell = () => {
       <Container component="main" maxWidth="xl" sx={{ py: 4 }}>
         <Routes>
           <Route path="/deals/board" element={<DealBoardPage />} />
-          <Route path="/deals/new" element={<Placeholder title="Criar negocio" />} />
+          <Route path="/deals/new" element={<CreateDealPage />} />
           <Route path="/deals/:dealId" element={<DealDetailsPage />} />
           <Route path="/leads" element={<LeadListPage />} />
           <Route path="/leads/new" element={<CreateLeadPage />} />
@@ -86,12 +87,3 @@ export const AppShell = () => {
     </Box>
   );
 };
-
-const Placeholder = ({ title }: { readonly title: string }) => (
-  <Stack spacing={1}>
-    <Typography component="h1" variant="h4">
-      {title}
-    </Typography>
-    <Typography color="text.secondary">Esta area sera implementada nas proximas etapas do CRM.</Typography>
-  </Stack>
-);

@@ -1,10 +1,12 @@
 import type {
   ChangeDealStatusDto,
   CommentDto,
+  CreateDealDto,
   CreateCommentDto,
   DealDetailsDto,
   DealDto,
-  DealListQuery
+  DealListQuery,
+  SellerDto
 } from "@kikos/shared";
 
 import { apiRequest } from "../../api/http";
@@ -55,6 +57,16 @@ export const listDealsRequest = (token: string, query: Partial<DealListQuery> = 
 
 export const getDealRequest = (token: string, dealId: string) =>
   apiRequest<{ deal: DealDetailsDto }>(`/deals/${dealId}`, { token });
+
+export const createDealRequest = (token: string, input: CreateDealDto) =>
+  apiRequest<{ deal: DealDto }>("/deals", {
+    method: "POST",
+    body: input,
+    token
+  });
+
+export const listSellersRequest = (token: string) =>
+  apiRequest<{ sellers: readonly SellerDto[] }>("/sellers", { token });
 
 export const changeDealStatusRequest = (token: string, dealId: string, input: ChangeDealStatusDto) =>
   apiRequest<{ deal: DealDto }>(`/deals/${dealId}/status`, {
