@@ -2,6 +2,7 @@ import type {
   AuthenticatedUser,
   ChangeDealStatusDto,
   CreateDealDto,
+  DealDetailsDto,
   DealDto,
   DealListQuery,
   LoseDealDto,
@@ -21,7 +22,7 @@ export type DealListResult = {
 export type DealRepository = {
   readonly list: (query: DealListQuery, user: AuthenticatedUser) => Promise<DealListResult>;
   readonly create: (input: CreateDealDto, changedBy: string) => Promise<DealDto>;
-  readonly findById: (dealId: string, user: AuthenticatedUser) => Promise<DealDto | null>;
+  readonly findById: (dealId: string, user: AuthenticatedUser) => Promise<DealDetailsDto | null>;
   readonly update: (dealId: string, input: UpdateDealDto, user: AuthenticatedUser) => Promise<DealDto | null>;
   readonly findStatusById: (dealId: string, user: AuthenticatedUser) => Promise<DealDto | null>;
   readonly changeStatus: (

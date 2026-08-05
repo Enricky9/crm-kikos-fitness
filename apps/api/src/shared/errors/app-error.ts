@@ -47,6 +47,12 @@ export class InvalidDealTransitionError extends AppError {
   }
 }
 
+export class CommentTargetNotFoundError extends AppError {
+  constructor() {
+    super("VALIDATION_ERROR", "Lead ou negocio informado nao existe", 422);
+  }
+}
+
 export class ValidationError extends AppError {
   constructor(details: unknown = null) {
     super("VALIDATION_ERROR", "Dados invalidos", 422, details);

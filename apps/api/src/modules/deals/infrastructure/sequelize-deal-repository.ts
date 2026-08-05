@@ -2,12 +2,21 @@ import { Op, type InferAttributes, type WhereOptions } from "sequelize";
 
 import type {
   AuthenticatedUser,
+  CommentDto,
+  DealDetailsDto,
   DealDto,
   DealListQuery,
+  DealStatusHistoryDto,
   DealStatus,
 } from "@kikos/shared";
 
-import { DealModel, DealStatusHistoryModel, LeadModel, UserModel } from "../../../shared/database/models/index.js";
+import {
+  CommentModel,
+  DealModel,
+  DealStatusHistoryModel,
+  LeadModel,
+  UserModel
+} from "../../../shared/database/models/index.js";
 import { sequelize } from "../../../shared/database/sequelize.js";
 import { LeadNotFoundError, SellerNotFoundError } from "../../../shared/errors/app-error.js";
 import { isClosedDealStatus } from "../domain/deal-transitions.js";
@@ -16,6 +25,22 @@ import type { DealRepository } from "../application/deal-repository.js";
 const includeRelations = [
   { model: LeadModel, as: "lead", attributes: ["id", "name", "company"], required: false },
   { model: UserModel, as: "seller", attributes: ["id", "name", "email"], required: false }
+];
+
+const includeDetailsRelations = [
+  ...includeRelations,
+  {
+    model: CommentModel,
+    as: "comments",
+    include: [{ model: UserModel, as: "author", attributes: ["id", "name", "email"], required: false }],
+    required: false
+  },
+  {
+    model: DealStatusHistoryModel,
+    as: "statusHistory",
+    include: [{ model: UserModel, as: "changedByUser", attributes: ["id", "name", "email"], required: false }],
+    required: false
+  }
 ];
 
 const toDealDto = (deal: DealModel): DealDto => {
@@ -48,6 +73,57 @@ const toDealDto = (deal: DealModel): DealDto => {
           email: seller.email
         }
       : null
+  };
+};
+
+const toCommentDto = (comment: CommentModel): CommentDto => {
+  const author = comment.get("author") as UserModel | undefined;
+
+  return {
+    id: comment.id,
+    content: comment.content,
+    authorId: comment.authorId,
+    leadId: comment.leadId,
+    dealId: comment.dealId,
+    createdAt: comment.createdAt.toISOString(),
+    author: author
+      ? {
+          id: author.id,
+          name: author.name,
+          email: author.email
+        }
+      : null
+  };
+};
+
+const toStatusHistoryDto = (history: DealStatusHistoryModel): DealStatusHistoryDto => {
+  const changedByUser = history.get("changedByUser") as UserModel | undefined;
+
+  return {
+    id: history.id,
+    dealId: history.dealId,
+    fromStatus: history.fromStatus,
+    toStatus: history.toStatus,
+    changedBy: history.changedBy,
+    createdAt: history.createdAt.toISOString(),
+    changedByUser: changedByUser
+      ? {
+          id: changedByUser.id,
+          name: changedByUser.name,
+          email: changedByUser.email
+        }
+      : null
+  };
+};
+
+const toDealDetailsDto = (deal: DealModel): DealDetailsDto => {
+  const comments = deal.get("comments") as CommentModel[] | undefined;
+  const statusHistory = deal.get("statusHistory") as DealStatusHistoryModel[] | undefined;
+
+  return {
+    ...toDealDto(deal),
+    comments: comments?.map(toCommentDto) ?? [],
+    statusHistory: statusHistory?.map(toStatusHistoryDto) ?? []
   };
 };
 
@@ -212,8 +288,19 @@ export const createSequelizeDealRepository = (): DealRepository => ({
     }),
 
   findById: async (dealId, user) => {
-    const deal = await findDealById(dealId, user);
-    return deal ? toDealDto(deal) : null;
+    const deal = await DealModel.findOne({
+      where: {
+        id: dealId,
+        ...(user.role === "SELLER" ? { sellerId: user.id } : {})
+      },
+      include: includeDetailsRelations,
+      order: [
+        [{ model: CommentModel, as: "comments" }, "created_at", "ASC"],
+        [{ model: DealStatusHistoryModel, as: "statusHistory" }, "created_at", "ASC"]
+      ]
+    });
+
+    return deal ? toDealDetailsDto(deal) : null;
   },
 
   update: async (dealId, input, user) => {

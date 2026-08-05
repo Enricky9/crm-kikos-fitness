@@ -96,7 +96,11 @@ const createDealRepository = (initialDeal: DealDto = demoDeal): DealRepository =
       }
     }),
   findById: (dealId, user) =>
-    Promise.resolve(dealId === initialDeal.id && canUserSeeDeal(user, initialDeal) ? initialDeal : null),
+    Promise.resolve(
+      dealId === initialDeal.id && canUserSeeDeal(user, initialDeal)
+        ? { ...initialDeal, comments: [], statusHistory: [] }
+        : null
+    ),
   update: (dealId, input, user) =>
     Promise.resolve(
       dealId === initialDeal.id && canUserSeeDeal(user, initialDeal)

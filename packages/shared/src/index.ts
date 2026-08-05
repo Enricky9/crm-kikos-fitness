@@ -169,3 +169,36 @@ export const loseDealSchema = z.object({
   reason: z.string().trim().min(1).optional()
 });
 export type LoseDealDto = z.infer<typeof loseDealSchema>;
+
+export const commentSchema = z.object({
+  id: z.string().uuid(),
+  content: z.string(),
+  authorId: z.string().uuid(),
+  leadId: z.string().uuid().nullable(),
+  dealId: z.string().uuid().nullable(),
+  createdAt: z.string(),
+  author: sellerSchema.nullable()
+});
+export type CommentDto = z.infer<typeof commentSchema>;
+
+export const createCommentSchema = z.object({
+  content: z.string().trim().min(1)
+});
+export type CreateCommentDto = z.infer<typeof createCommentSchema>;
+
+export const dealStatusHistorySchema = z.object({
+  id: z.string().uuid(),
+  dealId: z.string().uuid(),
+  fromStatus: dealStatusSchema.nullable(),
+  toStatus: dealStatusSchema,
+  changedBy: z.string().uuid(),
+  createdAt: z.string(),
+  changedByUser: sellerSchema.nullable()
+});
+export type DealStatusHistoryDto = z.infer<typeof dealStatusHistorySchema>;
+
+export const dealDetailsSchema = dealSchema.extend({
+  comments: z.array(commentSchema),
+  statusHistory: z.array(dealStatusHistorySchema)
+});
+export type DealDetailsDto = z.infer<typeof dealDetailsSchema>;
