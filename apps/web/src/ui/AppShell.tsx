@@ -16,6 +16,9 @@ import {
 import { Link as RouterLink, Route, Routes, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
+import { CreateLeadPage } from "../features/leads/CreateLeadPage";
+import { LeadDetailsPage } from "../features/leads/LeadDetailsPage";
+import { LeadListPage } from "../features/leads/LeadListPage";
 
 const navigationItems = [
   { label: "Board", path: "/deals/board", icon: <ViewKanbanIcon fontSize="small" /> },
@@ -71,7 +74,10 @@ export const AppShell = () => {
       <Container component="main" maxWidth="xl" sx={{ py: 4 }}>
         <Routes>
           <Route path="/deals/board" element={<Placeholder title="Funil comercial" />} />
-          <Route path="/leads" element={<Placeholder title="Leads" />} />
+          <Route path="/deals/new" element={<Placeholder title="Criar negocio" />} />
+          <Route path="/leads" element={<LeadListPage />} />
+          <Route path="/leads/new" element={<CreateLeadPage />} />
+          <Route path="/leads/:leadId" element={<LeadDetailsPage />} />
         </Routes>
       </Container>
     </Box>
