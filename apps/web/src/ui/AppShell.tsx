@@ -16,6 +16,7 @@ import {
 import { Link as RouterLink, Route, Routes, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
+import { DealBoardPage } from "../features/deals/DealBoardPage";
 import { CreateLeadPage } from "../features/leads/CreateLeadPage";
 import { LeadDetailsPage } from "../features/leads/LeadDetailsPage";
 import { LeadListPage } from "../features/leads/LeadListPage";
@@ -73,7 +74,7 @@ export const AppShell = () => {
 
       <Container component="main" maxWidth="xl" sx={{ py: 4 }}>
         <Routes>
-          <Route path="/deals/board" element={<Placeholder title="Funil comercial" />} />
+          <Route path="/deals/board" element={<DealBoardPage />} />
           <Route path="/deals/new" element={<Placeholder title="Criar negocio" />} />
           <Route path="/leads" element={<LeadListPage />} />
           <Route path="/leads/new" element={<CreateLeadPage />} />
