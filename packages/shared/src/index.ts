@@ -98,3 +98,74 @@ export const paginatedLeadsSchema = z.object({
   })
 });
 export type PaginatedLeadsDto = z.infer<typeof paginatedLeadsSchema>;
+
+export const sellerSchema = authenticatedUserSchema.pick({
+  id: true,
+  name: true,
+  email: true
+});
+export type SellerDto = z.infer<typeof sellerSchema>;
+
+export const dealSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  description: z.string().nullable(),
+  value: z.string(),
+  status: dealStatusSchema,
+  leadId: z.string().uuid(),
+  sellerId: z.string().uuid(),
+  lostReason: z.string().nullable(),
+  closedAt: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  lead: z
+    .object({
+      id: z.string().uuid(),
+      name: z.string(),
+      company: z.string().nullable()
+    })
+    .nullable(),
+  seller: sellerSchema.nullable()
+});
+export type DealDto = z.infer<typeof dealSchema>;
+
+export const createDealSchema = z.object({
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1).optional().nullable(),
+  value: z.coerce.number().nonnegative(),
+  status: openDealStatusSchema.default("NEW"),
+  leadId: z.string().uuid(),
+  sellerId: z.string().uuid()
+});
+export type CreateDealDto = z.infer<typeof createDealSchema>;
+
+export const updateDealSchema = z
+  .object({
+    title: z.string().trim().min(1).optional(),
+    description: z.string().trim().min(1).optional().nullable(),
+    value: z.coerce.number().nonnegative().optional(),
+    leadId: z.string().uuid().optional(),
+    sellerId: z.string().uuid().optional()
+  })
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "Informe ao menos um campo para atualizar"
+  });
+export type UpdateDealDto = z.infer<typeof updateDealSchema>;
+
+export const dealListQuerySchema = paginationQuerySchema.extend({
+  status: dealStatusSchema.optional(),
+  sellerId: z.string().uuid().optional(),
+  leadId: z.string().uuid().optional(),
+  search: z.string().trim().optional()
+});
+export type DealListQuery = z.infer<typeof dealListQuerySchema>;
+
+export const changeDealStatusSchema = z.object({
+  status: dealStatusSchema
+});
+export type ChangeDealStatusDto = z.infer<typeof changeDealStatusSchema>;
+
+export const loseDealSchema = z.object({
+  reason: z.string().trim().min(1).optional()
+});
+export type LoseDealDto = z.infer<typeof loseDealSchema>;

@@ -5,18 +5,24 @@ import Fastify from "fastify";
 
 import { createAuthService } from "../modules/auth/application/auth-service.js";
 import { registerAuthRoutes } from "../modules/auth/presentation/auth-routes.js";
+import type { DealRepository } from "../modules/deals/application/deal-repository.js";
+import { createDealService } from "../modules/deals/application/deal-service.js";
+import { createSequelizeDealRepository } from "../modules/deals/infrastructure/sequelize-deal-repository.js";
+import { registerDealRoutes } from "../modules/deals/presentation/deal-routes.js";
 import { createLeadService } from "../modules/leads/application/lead-service.js";
 import type { LeadRepository } from "../modules/leads/application/lead-repository.js";
 import { createSequelizeLeadRepository } from "../modules/leads/infrastructure/sequelize-lead-repository.js";
 import { registerLeadRoutes } from "../modules/leads/presentation/lead-routes.js";
 import type { UserRepository } from "../modules/users/application/user-repository.js";
 import { createSequelizeUserRepository } from "../modules/users/infrastructure/sequelize-user-repository.js";
+import { registerSellerRoutes } from "../modules/users/presentation/seller-routes.js";
 import { env } from "../shared/config/env.js";
 import { registerErrorHandler } from "../shared/http/error-handler.js";
 
 type BuildServerOptions = {
   readonly userRepository?: UserRepository;
   readonly leadRepository?: LeadRepository;
+  readonly dealRepository?: DealRepository;
 };
 
 export const buildServer = async (options: BuildServerOptions = {}) => {
@@ -47,8 +53,10 @@ export const buildServer = async (options: BuildServerOptions = {}) => {
 
   const userRepository = options.userRepository ?? createSequelizeUserRepository();
   const leadRepository = options.leadRepository ?? createSequelizeLeadRepository();
+  const dealRepository = options.dealRepository ?? createSequelizeDealRepository();
   const authService = createAuthService(userRepository);
   const leadService = createLeadService(leadRepository);
+  const dealService = createDealService(dealRepository);
 
   await server.register(
     async (apiRoutes) => {
@@ -60,6 +68,16 @@ export const buildServer = async (options: BuildServerOptions = {}) => {
         prefix: "/leads",
         authService,
         leadService
+      });
+      await apiRoutes.register(registerDealRoutes, {
+        prefix: "/deals",
+        authService,
+        dealService
+      });
+      await apiRoutes.register(registerSellerRoutes, {
+        prefix: "/sellers",
+        authService,
+        userRepository
       });
     },
     { prefix: "/api/v1" }

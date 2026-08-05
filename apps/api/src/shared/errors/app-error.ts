@@ -29,6 +29,24 @@ export class LeadNotFoundError extends AppError {
   }
 }
 
+export class DealNotFoundError extends AppError {
+  constructor() {
+    super("DEAL_NOT_FOUND", "Negocio nao encontrado", 404);
+  }
+}
+
+export class SellerNotFoundError extends AppError {
+  constructor() {
+    super("SELLER_NOT_FOUND", "Vendedor nao encontrado", 404);
+  }
+}
+
+export class InvalidDealTransitionError extends AppError {
+  constructor() {
+    super("INVALID_DEAL_TRANSITION", "Transicao de status invalida", 422);
+  }
+}
+
 export class ValidationError extends AppError {
   constructor(details: unknown = null) {
     super("VALIDATION_ERROR", "Dados invalidos", 422, details);

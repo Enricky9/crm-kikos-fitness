@@ -13,4 +13,5 @@ export type PublicUser = Omit<UserRecord, "passwordHash">;
 export type UserRepository = {
   readonly findByEmail: (email: string) => Promise<UserRecord | null>;
   readonly findById: (id: string) => Promise<UserRecord | null>;
+  readonly listSellers: () => Promise<readonly PublicUser[]>;
 };

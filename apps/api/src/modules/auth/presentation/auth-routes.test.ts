@@ -14,7 +14,8 @@ const demoUser: UserRecord = {
 
 const userRepository: UserRepository = {
   findByEmail: (email) => Promise.resolve(email === demoUser.email ? demoUser : null),
-  findById: (id) => Promise.resolve(id === demoUser.id ? demoUser : null)
+  findById: (id) => Promise.resolve(id === demoUser.id ? demoUser : null),
+  listSellers: () => Promise.resolve([])
 };
 
 describe("auth routes", () => {

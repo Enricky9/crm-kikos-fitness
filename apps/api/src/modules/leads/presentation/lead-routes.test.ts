@@ -29,7 +29,8 @@ const demoLead: LeadDto = {
 
 const userRepository: UserRepository = {
   findByEmail: (email) => Promise.resolve(email === demoUser.email ? demoUser : null),
-  findById: (id) => Promise.resolve(id === demoUser.id ? demoUser : null)
+  findById: (id) => Promise.resolve(id === demoUser.id ? demoUser : null),
+  listSellers: () => Promise.resolve([])
 };
 
 const createLeadRepository = (): LeadRepository => ({
