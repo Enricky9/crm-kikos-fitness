@@ -1,5 +1,8 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
+import SaveIcon from "@mui/icons-material/Save";
+import SendIcon from "@mui/icons-material/Send";
 import {
   Alert,
   Box,
@@ -12,20 +15,38 @@ import {
   Paper,
   Skeleton,
   Stack,
+  TextField,
   Typography
 } from "@mui/material";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Controller, useForm } from "react-hook-form";
 import { Link as RouterLink, useParams } from "react-router-dom";
 
-import { dealStatusLabels } from "@kikos/shared";
+import { createCommentSchema, dealStatusLabels, type CreateCommentDto } from "@kikos/shared";
 
+import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
 import { formatCurrency, formatDateTime } from "../../utils/format";
-import { getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "./leads-api";
+import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "./leads-api";
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof HttpError) {
+    return error.payload.error.message;
+  }
+
+  return fallback;
+};
 
 export const LeadDetailsPage = () => {
   const { leadId } = useParams<{ leadId: string }>();
   const { token } = useAuth();
+  const queryClient = useQueryClient();
+  const commentForm = useForm<CreateCommentDto>({
+    resolver: zodResolver(createCommentSchema),
+    defaultValues: {
+      content: ""
+    }
+  });
 
   const leadQuery = useQuery({
     queryKey: ["lead", leadId],
@@ -48,6 +69,14 @@ export const LeadDetailsPage = () => {
     ]
   });
 
+  const commentMutation = useMutation({
+    mutationFn: (input: CreateCommentDto) => createLeadCommentRequest(token ?? "", leadId ?? "", input),
+    onSuccess: () => {
+      commentForm.reset({ content: "" });
+      void queryClient.invalidateQueries({ queryKey: ["lead-comments", leadId] });
+    }
+  });
+
   if (leadQuery.isLoading) {
     return (
       <Stack spacing={2}>
@@ -62,6 +91,12 @@ export const LeadDetailsPage = () => {
   }
 
   const lead = leadQuery.data.lead;
+  const submitComment = commentForm.handleSubmit((values) => {
+    commentMutation.mutate(values);
+  });
+  const commentError = commentMutation.error
+    ? getErrorMessage(commentMutation.error, "Nao foi possivel adicionar o comentario.")
+    : null;
 
   return (
     <Stack spacing={3}>
@@ -127,6 +162,41 @@ export const LeadDetailsPage = () => {
           <Typography component="h2" variant="h6">
             Comentarios
           </Typography>
+          <Paper
+            component="form"
+            elevation={0}
+            onSubmit={(event) => {
+              void submitComment(event);
+            }}
+            sx={{ border: 1, borderColor: "divider", p: 2 }}
+          >
+            <Stack spacing={2}>
+              {commentError ? <Alert severity="error">{commentError}</Alert> : null}
+              <Controller
+                control={commentForm.control}
+                name="content"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    error={Boolean(fieldState.error)}
+                    fullWidth
+                    helperText={fieldState.error?.message}
+                    label="Novo comentario"
+                    multiline
+                    minRows={3}
+                  />
+                )}
+              />
+              <Button
+                disabled={commentMutation.isPending}
+                startIcon={commentMutation.isPending ? <SaveIcon /> : <SendIcon />}
+                type="submit"
+                variant="contained"
+              >
+                {commentMutation.isPending ? "Salvando..." : "Adicionar comentario"}
+              </Button>
+            </Stack>
+          </Paper>
           {commentsQuery.isLoading ? <Skeleton variant="rectangular" height={96} /> : null}
           {commentsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os comentarios.</Alert> : null}
           {commentsQuery.data?.comments.length === 0 ? (

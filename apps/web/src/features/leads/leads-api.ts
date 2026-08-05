@@ -1,4 +1,12 @@
-import type { CommentDto, CreateLeadDto, DealDto, LeadDto, LeadListQuery, PaginatedLeadsDto } from "@kikos/shared";
+import type {
+  CommentDto,
+  CreateCommentDto,
+  CreateLeadDto,
+  DealDto,
+  LeadDto,
+  LeadListQuery,
+  PaginatedLeadsDto
+} from "@kikos/shared";
 
 import { apiRequest } from "../../api/http";
 
@@ -44,6 +52,13 @@ export const getLeadRequest = (token: string, leadId: string) =>
 
 export const listLeadCommentsRequest = (token: string, leadId: string) =>
   apiRequest<{ comments: readonly CommentDto[] }>(`/leads/${leadId}/comments`, { token });
+
+export const createLeadCommentRequest = (token: string, leadId: string, input: CreateCommentDto) =>
+  apiRequest<{ comment: CommentDto }>(`/leads/${leadId}/comments`, {
+    method: "POST",
+    body: input,
+    token
+  });
 
 export const listLeadDealsRequest = (token: string, leadId: string) =>
   apiRequest<{
