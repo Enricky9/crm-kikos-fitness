@@ -22,6 +22,7 @@ import { createSequelizeUserRepository } from "../modules/users/infrastructure/s
 import { registerSellerRoutes } from "../modules/users/presentation/seller-routes.js";
 import { env } from "../shared/config/env.js";
 import { registerErrorHandler } from "../shared/http/error-handler.js";
+import { registerSwagger } from "./plugins/swagger.js";
 
 type BuildServerOptions = {
   readonly userRepository?: UserRepository;
@@ -50,6 +51,7 @@ export const buildServer = async (options: BuildServerOptions = {}) => {
   });
 
   registerErrorHandler(server);
+  await registerSwagger(server);
 
   server.get("/health", () => ({
     status: "ok",
