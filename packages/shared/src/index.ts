@@ -6,6 +6,17 @@ export type UserRole = z.infer<typeof userRoleSchema>;
 export const dealStatusSchema = z.enum(["NEW", "IN_PROGRESS", "PROPOSAL", "WON", "LOST"]);
 export type DealStatus = z.infer<typeof dealStatusSchema>;
 
+export const openDealStatusSchema = z.enum(["NEW", "IN_PROGRESS", "PROPOSAL"]);
+export type OpenDealStatus = z.infer<typeof openDealStatusSchema>;
+
+export const dealStatusLabels: Record<DealStatus, string> = {
+  NEW: "Novo",
+  IN_PROGRESS: "Em andamento",
+  PROPOSAL: "Proposta",
+  WON: "Ganho",
+  LOST: "Perdido"
+};
+
 export const apiErrorCodeSchema = z.enum([
   "INVALID_CREDENTIALS",
   "UNAUTHORIZED",
