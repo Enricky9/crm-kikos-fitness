@@ -20,6 +20,7 @@ export const dealStatusLabels: Record<DealStatus, string> = {
 export const apiErrorCodeSchema = z.enum([
   "INVALID_CREDENTIALS",
   "UNAUTHORIZED",
+  "FORBIDDEN",
   "LEAD_NOT_FOUND",
   "DEAL_NOT_FOUND",
   "SELLER_NOT_FOUND",
@@ -44,3 +45,11 @@ export const paginationQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).default(20)
 });
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
+
+export const authenticatedUserSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  email: z.string().email(),
+  role: userRoleSchema
+});
+export type AuthenticatedUser = z.infer<typeof authenticatedUserSchema>;
