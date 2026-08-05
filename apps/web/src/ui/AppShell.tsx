@@ -1,5 +1,6 @@
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupsIcon from "@mui/icons-material/Groups";
+import LogoutIcon from "@mui/icons-material/Logout";
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
 import {
   AppBar,
@@ -12,7 +13,9 @@ import {
   useMediaQuery,
   useTheme
 } from "@mui/material";
-import { Link as RouterLink, Route, Routes } from "react-router-dom";
+import { Link as RouterLink, Route, Routes, useNavigate } from "react-router-dom";
+
+import { useAuth } from "../auth/AuthContext";
 
 const navigationItems = [
   { label: "Board", path: "/deals/board", icon: <ViewKanbanIcon fontSize="small" /> },
@@ -22,6 +25,13 @@ const navigationItems = [
 export const AppShell = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const auth = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    auth.logout();
+    void navigate("/login", { replace: true });
+  };
 
   return (
     <Box minHeight="100vh" bgcolor="background.default">
@@ -30,6 +40,9 @@ export const AppShell = () => {
           <FitnessCenterIcon color="primary" />
           <Typography component="div" variant="h6" sx={{ flexGrow: 1 }}>
             Kikos CRM
+          </Typography>
+          <Typography color="text.secondary" sx={{ display: { xs: "none", md: "block" } }}>
+            {auth.user?.name}
           </Typography>
           <Stack direction="row" spacing={1}>
             {navigationItems.map((item) => (
@@ -43,6 +56,14 @@ export const AppShell = () => {
                 {isSmallScreen ? item.icon : item.label}
               </Button>
             ))}
+            <Button
+              aria-label="Sair"
+              onClick={handleLogout}
+              startIcon={isSmallScreen ? undefined : <LogoutIcon fontSize="small" />}
+              variant="outlined"
+            >
+              {isSmallScreen ? <LogoutIcon fontSize="small" /> : "Sair"}
+            </Button>
           </Stack>
         </Toolbar>
       </AppBar>
@@ -57,13 +78,11 @@ export const AppShell = () => {
   );
 };
 
-const Placeholder = ({ title }: { title: string }) => (
+const Placeholder = ({ title }: { readonly title: string }) => (
   <Stack spacing={1}>
     <Typography component="h1" variant="h4">
       {title}
     </Typography>
-    <Typography color="text.secondary">
-      Esta área será implementada nas próximas etapas do CRM.
-    </Typography>
+    <Typography color="text.secondary">Esta area sera implementada nas proximas etapas do CRM.</Typography>
   </Stack>
 );

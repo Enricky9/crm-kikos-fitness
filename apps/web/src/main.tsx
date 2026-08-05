@@ -4,6 +4,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
+import { AuthProvider } from "./auth/AuthContext";
+import { RequireAuth } from "./auth/RequireAuth";
+import { LoginPage } from "./features/auth/LoginPage";
 import { AppShell } from "./ui/AppShell";
 
 const queryClient = new QueryClient();
@@ -34,12 +37,17 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/deals/board" replace />} />
-            <Route path="/*" element={<AppShell />} />
-          </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route element={<RequireAuth />}>
+                <Route path="/" element={<Navigate to="/deals/board" replace />} />
+                <Route path="/*" element={<AppShell />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>
