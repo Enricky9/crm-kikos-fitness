@@ -37,7 +37,7 @@ export const LoginPage = () => {
   });
 
   const locationState = location.state as LocationState | null;
-  const redirectTo = locationState?.from?.pathname ?? "/deals/board";
+  const redirectTo = locationState?.from?.pathname ?? "/dashboard";
 
   if (auth.status === "authenticated") {
     return <Navigate to={redirectTo} replace />;

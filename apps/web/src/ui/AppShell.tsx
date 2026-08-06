@@ -219,7 +219,7 @@ export const AppShell = () => {
           <Route path="/leads/new" element={<CreateLeadPage />} />
           <Route path="/leads/:leadId" element={<LeadDetailsPage />} />
           <Route path="/sellers" element={<SellersPage />} />
-          <Route path="*" element={<Placeholder title="Pagina nao encontrada" />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </Box>
       </Box>
@@ -227,11 +227,20 @@ export const AppShell = () => {
   );
 };
 
-const Placeholder = ({ title }: { readonly title: string }) => (
-  <Stack spacing={1}>
+const NotFoundPage = () => (
+  <Stack
+    spacing={1}
+    sx={{
+      bgcolor: "background.paper",
+      border: 1,
+      borderColor: "divider",
+      borderRadius: 1,
+      p: { xs: 2, md: 3 }
+    }}
+  >
     <Typography component="h1" variant="h4">
-      {title}
+      Pagina nao encontrada
     </Typography>
-    <Typography color="text.secondary">Esta area sera refinada nas proximas etapas visuais do CRM.</Typography>
+    <Typography color="text.secondary">Verifique o endereço ou volte pelo menu lateral.</Typography>
   </Stack>
 );
