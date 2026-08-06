@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
-import { Alert, Button, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
@@ -47,14 +47,17 @@ export const CreateLeadPage = () => {
         : null;
 
   return (
-    <Stack spacing={3} maxWidth={720}>
-      <Stack direction="row" spacing={2} alignItems="center">
+    <Stack spacing={3} sx={{ maxWidth: 920, mx: "auto", width: "100%" }}>
+      <Stack spacing={1.5}>
         <Button component={RouterLink} startIcon={<ArrowBackIcon />} to="/leads" variant="text">
           Voltar
         </Button>
-        <Typography component="h1" variant="h4">
-          Criar lead
-        </Typography>
+        <Box>
+          <Typography component="h1" variant="h4">
+            Criar lead
+          </Typography>
+          <Typography color="text.secondary">Cadastre um contato para iniciar o relacionamento comercial.</Typography>
+        </Box>
       </Stack>
 
       <Paper
@@ -63,90 +66,108 @@ export const CreateLeadPage = () => {
           void onSubmit(event);
         }}
         elevation={0}
-        sx={{ border: 1, borderColor: "divider", p: { xs: 2, md: 3 } }}
+        sx={{
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+          boxShadow: "0 18px 44px rgba(0, 0, 0, 0.22)",
+          p: { xs: 2, md: 3 }
+        }}
       >
         <Stack spacing={3}>
           {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
 
-          <Controller
-            control={form.control}
-            name="name"
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                error={Boolean(fieldState.error)}
-                fullWidth
-                helperText={fieldState.error?.message}
-                label="Nome"
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="email"
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                error={Boolean(fieldState.error)}
-                fullWidth
-                helperText={fieldState.error?.message}
-                label="E-mail"
-                type="email"
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="phone"
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                error={Boolean(fieldState.error)}
-                fullWidth
-                helperText={fieldState.error?.message}
-                label="Telefone"
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="company"
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                error={Boolean(fieldState.error)}
-                fullWidth
-                helperText={fieldState.error?.message}
-                label="Empresa"
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="source"
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                error={Boolean(fieldState.error)}
-                fullWidth
-                helperText={fieldState.error?.message}
-                label="Origem"
-              />
-            )}
-          />
-
-          <Button
-            disabled={createLeadMutation.isPending}
-            startIcon={<SaveIcon />}
-            type="submit"
-            variant="contained"
+          <Box
+            sx={{
+              display: "grid",
+              gap: 2,
+              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" }
+            }}
           >
-            {createLeadMutation.isPending ? "Salvando..." : "Salvar lead"}
-          </Button>
+            <Controller
+              control={form.control}
+              name="name"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  fullWidth
+                  helperText={fieldState.error?.message}
+                  label="Nome"
+                />
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="email"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  fullWidth
+                  helperText={fieldState.error?.message}
+                  label="E-mail"
+                  type="email"
+                />
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="phone"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  fullWidth
+                  helperText={fieldState.error?.message}
+                  label="Telefone"
+                />
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="company"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  fullWidth
+                  helperText={fieldState.error?.message}
+                  label="Empresa"
+                />
+              )}
+            />
+
+            <Box sx={{ gridColumn: { xs: "auto", md: "1 / -1" } }}>
+              <Controller
+                control={form.control}
+                name="source"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    error={Boolean(fieldState.error)}
+                    fullWidth
+                    helperText={fieldState.error?.message}
+                    label="Origem"
+                  />
+                )}
+              />
+            </Box>
+          </Box>
+
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-end">
+            <Button
+              disabled={createLeadMutation.isPending}
+              startIcon={<SaveIcon />}
+              type="submit"
+              variant="contained"
+            >
+              {createLeadMutation.isPending ? "Salvando..." : "Salvar lead"}
+            </Button>
+          </Stack>
         </Stack>
       </Paper>
     </Stack>

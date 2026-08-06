@@ -3,6 +3,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import {
   Alert,
+  Box,
   Button,
   FormControl,
   InputLabel,
@@ -93,14 +94,17 @@ export const CreateDealPage = () => {
     : null;
 
   return (
-    <Stack spacing={3} maxWidth={820}>
-      <Stack direction="row" spacing={2} alignItems="center">
+    <Stack spacing={3} sx={{ maxWidth: 980, mx: "auto", width: "100%" }}>
+      <Stack spacing={1.5}>
         <Button component={RouterLink} startIcon={<ArrowBackIcon />} to="/deals/board" variant="text">
           Voltar
         </Button>
-        <Typography component="h1" variant="h4">
-          Criar negocio
-        </Typography>
+        <Box>
+          <Typography component="h1" variant="h4">
+            Criar negocio
+          </Typography>
+          <Typography color="text.secondary">Registre uma oportunidade e posicione no funil comercial.</Typography>
+        </Box>
       </Stack>
 
       <Paper
@@ -109,133 +113,153 @@ export const CreateDealPage = () => {
         onSubmit={(event) => {
           void onSubmit(event);
         }}
-        sx={{ border: 1, borderColor: "divider", p: { xs: 2, md: 3 } }}
+        sx={{
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+          boxShadow: "0 18px 44px rgba(0, 0, 0, 0.22)",
+          p: { xs: 2, md: 3 }
+        }}
       >
         <Stack spacing={3}>
           {optionsError ? <Alert severity="error">{optionsError}</Alert> : null}
           {mutationError ? <Alert severity="error">{mutationError}</Alert> : null}
           {isLoadingOptions ? <Skeleton height={80} variant="rounded" /> : null}
 
-          <Controller
-            control={form.control}
-            name="title"
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                error={Boolean(fieldState.error)}
-                fullWidth
-                helperText={fieldState.error?.message}
-                label="Titulo"
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="description"
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                error={Boolean(fieldState.error)}
-                fullWidth
-                helperText={fieldState.error?.message}
-                label="Descricao"
-                multiline
-                minRows={3}
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="value"
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                error={Boolean(fieldState.error)}
-                fullWidth
-                helperText={fieldState.error?.message}
-                inputProps={{ min: 0, step: "0.01" }}
-                label="Valor"
-                type="number"
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="leadId"
-            render={({ field, fieldState }) => (
-              <FormControl fullWidth error={Boolean(fieldState.error)}>
-                <InputLabel id="deal-lead-label">Lead</InputLabel>
-                <Select {...field} label="Lead" labelId="deal-lead-label">
-                  {leadsQuery.data?.data.map((lead) => (
-                    <MenuItem key={lead.id} value={lead.id}>
-                      {lead.name} {lead.company ? `- ${lead.company}` : ""}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {fieldState.error ? (
-                  <Typography color="error" variant="caption">
-                    {fieldState.error.message}
-                  </Typography>
-                ) : null}
-              </FormControl>
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="sellerId"
-            render={({ field, fieldState }) => (
-              <FormControl fullWidth error={Boolean(fieldState.error)}>
-                <InputLabel id="deal-seller-label">Vendedor</InputLabel>
-                <Select {...field} label="Vendedor" labelId="deal-seller-label">
-                  {sellersQuery.data?.sellers.map((seller) => (
-                    <MenuItem key={seller.id} value={seller.id}>
-                      {seller.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {fieldState.error ? (
-                  <Typography color="error" variant="caption">
-                    {fieldState.error.message}
-                  </Typography>
-                ) : null}
-              </FormControl>
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="status"
-            render={({ field, fieldState }) => (
-              <FormControl fullWidth error={Boolean(fieldState.error)}>
-                <InputLabel id="deal-status-label">Status inicial</InputLabel>
-                <Select {...field} label="Status inicial" labelId="deal-status-label">
-                  {initialStatuses.map((status) => (
-                    <MenuItem key={status} value={status}>
-                      {dealStatusLabels[status]}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {fieldState.error ? (
-                  <Typography color="error" variant="caption">
-                    {fieldState.error.message}
-                  </Typography>
-                ) : null}
-              </FormControl>
-            )}
-          />
-
-          <Button
-            disabled={createMutation.isPending || isLoadingOptions}
-            startIcon={<SaveIcon />}
-            type="submit"
-            variant="contained"
+          <Box
+            sx={{
+              display: "grid",
+              gap: 2,
+              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" }
+            }}
           >
-            {createMutation.isPending ? "Salvando..." : "Salvar negocio"}
-          </Button>
+            <Box sx={{ gridColumn: { xs: "auto", md: "1 / -1" } }}>
+              <Controller
+                control={form.control}
+                name="title"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    error={Boolean(fieldState.error)}
+                    fullWidth
+                    helperText={fieldState.error?.message}
+                    label="Titulo"
+                  />
+                )}
+              />
+            </Box>
+
+            <Box sx={{ gridColumn: { xs: "auto", md: "1 / -1" } }}>
+              <Controller
+                control={form.control}
+                name="description"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    error={Boolean(fieldState.error)}
+                    fullWidth
+                    helperText={fieldState.error?.message}
+                    label="Descricao"
+                    multiline
+                    minRows={3}
+                  />
+                )}
+              />
+            </Box>
+
+            <Controller
+              control={form.control}
+              name="value"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  fullWidth
+                  helperText={fieldState.error?.message}
+                  inputProps={{ min: 0, step: "0.01" }}
+                  label="Valor"
+                  type="number"
+                />
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="status"
+              render={({ field, fieldState }) => (
+                <FormControl fullWidth error={Boolean(fieldState.error)}>
+                  <InputLabel id="deal-status-label">Status inicial</InputLabel>
+                  <Select {...field} label="Status inicial" labelId="deal-status-label">
+                    {initialStatuses.map((status) => (
+                      <MenuItem key={status} value={status}>
+                        {dealStatusLabels[status]}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {fieldState.error ? (
+                    <Typography color="error" variant="caption">
+                      {fieldState.error.message}
+                    </Typography>
+                  ) : null}
+                </FormControl>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="leadId"
+              render={({ field, fieldState }) => (
+                <FormControl fullWidth error={Boolean(fieldState.error)}>
+                  <InputLabel id="deal-lead-label">Lead</InputLabel>
+                  <Select {...field} label="Lead" labelId="deal-lead-label">
+                    {leadsQuery.data?.data.map((lead) => (
+                      <MenuItem key={lead.id} value={lead.id}>
+                        {lead.name} {lead.company ? `- ${lead.company}` : ""}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {fieldState.error ? (
+                    <Typography color="error" variant="caption">
+                      {fieldState.error.message}
+                    </Typography>
+                  ) : null}
+                </FormControl>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="sellerId"
+              render={({ field, fieldState }) => (
+                <FormControl fullWidth error={Boolean(fieldState.error)}>
+                  <InputLabel id="deal-seller-label">Vendedor</InputLabel>
+                  <Select {...field} label="Vendedor" labelId="deal-seller-label">
+                    {sellersQuery.data?.sellers.map((seller) => (
+                      <MenuItem key={seller.id} value={seller.id}>
+                        {seller.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {fieldState.error ? (
+                    <Typography color="error" variant="caption">
+                      {fieldState.error.message}
+                    </Typography>
+                  ) : null}
+                </FormControl>
+              )}
+            />
+          </Box>
+
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-end">
+            <Button
+              disabled={createMutation.isPending || isLoadingOptions}
+              startIcon={<SaveIcon />}
+              type="submit"
+              variant="contained"
+            >
+              {createMutation.isPending ? "Salvando..." : "Salvar negocio"}
+            </Button>
+          </Stack>
         </Stack>
       </Paper>
     </Stack>
