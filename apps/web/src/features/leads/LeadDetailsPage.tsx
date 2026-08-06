@@ -8,7 +8,6 @@ import {
   Box,
   Button,
   Chip,
-  Divider,
   List,
   ListItem,
   ListItemText,
@@ -22,7 +21,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/rea
 import { Controller, useForm } from "react-hook-form";
 import { Link as RouterLink, useParams } from "react-router-dom";
 
-import { createCommentSchema, dealStatusLabels, type CreateCommentDto } from "@kikos/shared";
+import { createCommentSchema, dealStatusLabels, type CreateCommentDto, type DealStatus } from "@kikos/shared";
 
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
@@ -36,6 +35,40 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 
   return fallback;
 };
+
+const statusStyle: Record<DealStatus, { readonly bg: string; readonly border: string; readonly color: string }> = {
+  NEW: {
+    bg: "rgba(154, 154, 165, 0.12)",
+    border: "rgba(154, 154, 165, 0.32)",
+    color: "#D7D7DE"
+  },
+  IN_PROGRESS: {
+    bg: "rgba(255, 77, 45, 0.14)",
+    border: "rgba(255, 77, 45, 0.42)",
+    color: "#FFB8A8"
+  },
+  PROPOSAL: {
+    bg: "rgba(111, 168, 255, 0.14)",
+    border: "rgba(111, 168, 255, 0.36)",
+    color: "#B8D3FF"
+  },
+  WON: {
+    bg: "rgba(61, 220, 151, 0.14)",
+    border: "rgba(61, 220, 151, 0.38)",
+    color: "#9FF0CC"
+  },
+  LOST: {
+    bg: "rgba(255, 99, 99, 0.14)",
+    border: "rgba(255, 99, 99, 0.38)",
+    color: "#FFB3B3"
+  }
+};
+
+const statusChipSx = (status: DealStatus) => ({
+  bgcolor: statusStyle[status].bg,
+  borderColor: statusStyle[status].border,
+  color: statusStyle[status].color
+});
 
 export const LeadDetailsPage = () => {
   const { leadId } = useParams<{ leadId: string }>();
@@ -100,8 +133,8 @@ export const LeadDetailsPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-        <Stack direction="row" spacing={2} alignItems="center">
+      <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ xs: "stretch", md: "center" }} justifyContent="space-between">
+        <Stack spacing={1.5}>
           <Button component={RouterLink} startIcon={<ArrowBackIcon />} to="/leads" variant="text">
             Voltar
           </Button>
@@ -117,115 +150,216 @@ export const LeadDetailsPage = () => {
         </Button>
       </Stack>
 
-      <Paper elevation={0} sx={{ border: 1, borderColor: "divider", p: { xs: 2, md: 3 } }}>
+      <Box
+        sx={{
+          alignItems: "start",
+          display: "grid",
+          gap: 2,
+          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 360px" }
+        }}
+      >
         <Stack spacing={2}>
-          <Typography component="h2" variant="h6">
-            Dados do lead
-          </Typography>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
-            <Info label="E-mail" value={lead.email ?? "-"} />
-            <Info label="Telefone" value={lead.phone} />
-            <Info label="Origem" value={lead.source ?? "-"} />
-            <Info label="Cadastro" value={formatDateTime(lead.createdAt)} />
-          </Stack>
-        </Stack>
-      </Paper>
-
-      <Paper elevation={0} sx={{ border: 1, borderColor: "divider", p: { xs: 2, md: 3 } }}>
-        <Stack spacing={2}>
-          <Typography component="h2" variant="h6">
-            Negocios relacionados
-          </Typography>
-          {dealsQuery.isLoading ? <Skeleton variant="rectangular" height={96} /> : null}
-          {dealsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os negocios.</Alert> : null}
-          {dealsQuery.data?.data.length === 0 ? (
-            <Typography color="text.secondary">Nenhum negocio relacionado.</Typography>
-          ) : null}
-          <Stack spacing={1.5}>
-            {dealsQuery.data?.data.map((deal) => (
-              <Paper key={deal.id} elevation={0} sx={{ border: 1, borderColor: "divider", p: 2 }}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} justifyContent="space-between">
-                  <Box>
-                    <Typography fontWeight={700}>{deal.title}</Typography>
-                    <Typography color="text.secondary">{formatCurrency(deal.value)}</Typography>
-                  </Box>
-                  <Chip label={dealStatusLabels[deal.status]} />
-                </Stack>
-              </Paper>
-            ))}
-          </Stack>
-        </Stack>
-      </Paper>
-
-      <Paper elevation={0} sx={{ border: 1, borderColor: "divider", p: { xs: 2, md: 3 } }}>
-        <Stack spacing={2}>
-          <Typography component="h2" variant="h6">
-            Comentarios
-          </Typography>
           <Paper
-            component="form"
             elevation={0}
-            onSubmit={(event) => {
-              void submitComment(event);
+            sx={{
+              bgcolor: "background.paper",
+              border: 1,
+              borderColor: "divider",
+              boxShadow: "0 18px 44px rgba(0, 0, 0, 0.22)",
+              p: { xs: 2, md: 3 }
             }}
-            sx={{ border: 1, borderColor: "divider", p: 2 }}
           >
             <Stack spacing={2}>
-              {commentError ? <Alert severity="error">{commentError}</Alert> : null}
-              <Controller
-                control={commentForm.control}
-                name="content"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    error={Boolean(fieldState.error)}
-                    fullWidth
-                    helperText={fieldState.error?.message}
-                    label="Novo comentario"
-                    multiline
-                    minRows={3}
-                  />
-                )}
-              />
-              <Button
-                disabled={commentMutation.isPending}
-                startIcon={commentMutation.isPending ? <SaveIcon /> : <SendIcon />}
-                type="submit"
-                variant="contained"
+              <Typography component="h2" variant="h6">
+                Dados do lead
+              </Typography>
+              <Box
+                sx={{
+                  display: "grid",
+                  gap: 1.5,
+                  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }
+                }}
               >
-                {commentMutation.isPending ? "Salvando..." : "Adicionar comentario"}
-              </Button>
+                <Info label="E-mail" value={lead.email ?? "-"} />
+                <Info label="Telefone" value={lead.phone} />
+                <Info label="Origem" value={lead.source ?? "-"} />
+                <Info label="Cadastro" value={formatDateTime(lead.createdAt)} />
+              </Box>
             </Stack>
           </Paper>
-          {commentsQuery.isLoading ? <Skeleton variant="rectangular" height={96} /> : null}
-          {commentsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os comentarios.</Alert> : null}
-          {commentsQuery.data?.comments.length === 0 ? (
-            <Typography color="text.secondary">Nenhum comentario registrado.</Typography>
-          ) : null}
-          <List disablePadding>
-            {commentsQuery.data?.comments.map((comment, index) => (
-              <Box key={comment.id}>
-                {index > 0 ? <Divider /> : null}
-                <ListItem disableGutters alignItems="flex-start">
-                  <ListItemText
-                    primary={comment.content}
-                    secondary={`${comment.author?.name ?? "Autor"} - ${formatDateTime(comment.createdAt)}`}
+
+          <Paper
+            elevation={0}
+            sx={{
+              bgcolor: "background.paper",
+              border: 1,
+              borderColor: "divider",
+              p: { xs: 2, md: 3 }
+            }}
+          >
+            <Stack spacing={2}>
+              <Typography component="h2" variant="h6">
+                Comentarios
+              </Typography>
+              <Paper
+                component="form"
+                elevation={0}
+                onSubmit={(event) => {
+                  void submitComment(event);
+                }}
+                sx={{ bgcolor: "#111115", border: 1, borderColor: "divider", p: 2 }}
+              >
+                <Stack spacing={2}>
+                  {commentError ? <Alert severity="error">{commentError}</Alert> : null}
+                  <Controller
+                    control={commentForm.control}
+                    name="content"
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        error={Boolean(fieldState.error)}
+                        fullWidth
+                        helperText={fieldState.error?.message}
+                        label="Novo comentario"
+                        multiline
+                        minRows={3}
+                      />
+                    )}
                   />
-                </ListItem>
-              </Box>
-            ))}
-          </List>
+                  <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-end">
+                    <Button
+                      disabled={commentMutation.isPending}
+                      startIcon={commentMutation.isPending ? <SaveIcon /> : <SendIcon />}
+                      type="submit"
+                      variant="contained"
+                    >
+                      {commentMutation.isPending ? "Salvando..." : "Adicionar comentario"}
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Paper>
+              {commentsQuery.isLoading ? <Skeleton variant="rounded" height={96} /> : null}
+              {commentsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os comentarios.</Alert> : null}
+              {commentsQuery.data?.comments.length === 0 ? (
+                <Box py={3} textAlign="center">
+                  <Typography fontWeight={700}>Nenhum comentario registrado.</Typography>
+                  <Typography color="text.secondary" variant="body2">
+                    Use o campo acima para registrar uma interacao com o lead.
+                  </Typography>
+                </Box>
+              ) : null}
+              <List disablePadding>
+                {commentsQuery.data?.comments.map((comment) => (
+                  <ListItem
+                    alignItems="flex-start"
+                    key={comment.id}
+                    sx={{
+                      border: 1,
+                      borderColor: "divider",
+                      borderRadius: 1,
+                      mb: 1,
+                      px: 2
+                    }}
+                  >
+                    <ListItemText
+                      primary={comment.content}
+                      secondary={`${comment.author?.name ?? "Autor"} - ${formatDateTime(comment.createdAt)}`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Stack>
+          </Paper>
         </Stack>
-      </Paper>
+
+        <Paper
+          elevation={0}
+          sx={{
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            p: { xs: 2, md: 3 },
+            position: { lg: "sticky" },
+            top: { lg: 24 }
+          }}
+        >
+          <Stack spacing={2}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+              <Typography component="h2" variant="h6">
+                Negocios
+              </Typography>
+              <Chip
+                label={dealsQuery.data?.data.length ?? 0}
+                size="small"
+                sx={{
+                  bgcolor: "rgba(255, 77, 45, 0.14)",
+                  borderColor: "rgba(255, 77, 45, 0.38)",
+                  color: "text.primary",
+                  minWidth: 34
+                }}
+                variant="outlined"
+              />
+            </Stack>
+            {dealsQuery.isLoading ? <Skeleton variant="rounded" height={96} /> : null}
+            {dealsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os negocios.</Alert> : null}
+            {dealsQuery.data?.data.length === 0 ? (
+              <Box py={3} textAlign="center">
+                <Typography fontWeight={700}>Nenhum negocio relacionado.</Typography>
+                <Typography color="text.secondary" variant="body2">
+                  Crie uma oportunidade a partir deste lead.
+                </Typography>
+              </Box>
+            ) : null}
+            <Stack spacing={1.5}>
+              {dealsQuery.data?.data.map((deal) => (
+                <Paper
+                  key={deal.id}
+                  elevation={0}
+                  sx={{
+                    bgcolor: "#111115",
+                    border: 1,
+                    borderColor: "divider",
+                    p: 2,
+                    transition: "border-color 160ms ease, box-shadow 160ms ease",
+                    "&:hover": {
+                      borderColor: "primary.main",
+                      boxShadow: "0 18px 42px rgba(255, 77, 45, 0.14)"
+                    }
+                  }}
+                >
+                  <Stack spacing={1.25}>
+                    <Box>
+                      <Typography fontWeight={700}>{deal.title}</Typography>
+                      <Typography color="text.secondary">{formatCurrency(deal.value)}</Typography>
+                    </Box>
+                    <Chip label={dealStatusLabels[deal.status]} size="small" sx={statusChipSx(deal.status)} variant="outlined" />
+                  </Stack>
+                </Paper>
+              ))}
+            </Stack>
+          </Stack>
+        </Paper>
+      </Box>
     </Stack>
   );
 };
 
 const Info = ({ label, value }: { readonly label: string; readonly value: string }) => (
-  <Box minWidth={160}>
+  <Box
+    sx={{
+      bgcolor: "#111115",
+      border: 1,
+      borderColor: "divider",
+      borderRadius: 1,
+      minWidth: 0,
+      p: 1.5
+    }}
+  >
     <Typography color="text.secondary" variant="body2">
       {label}
     </Typography>
-    <Typography fontWeight={700}>{value}</Typography>
+    <Typography fontWeight={700} noWrap>
+      {value}
+    </Typography>
   </Box>
 );
