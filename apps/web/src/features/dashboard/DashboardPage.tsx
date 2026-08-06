@@ -17,18 +17,18 @@ import { listLeadsRequest } from "../leads/leads-api";
 
 const dashboardStatuses = ["NEW", "IN_PROGRESS", "PROPOSAL", "WON", "LOST"] as const satisfies readonly DealStatus[];
 
-const getOpenPipelineValue = (deals: readonly DealDto[]) =>
+export const getOpenPipelineValue = (deals: readonly DealDto[]) =>
   deals
     .filter((deal) => deal.status !== "WON" && deal.status !== "LOST")
     .reduce((total, deal) => total + Number(deal.value), 0);
 
-const getWonValue = (deals: readonly DealDto[]) =>
+export const getWonValue = (deals: readonly DealDto[]) =>
   deals.filter((deal) => deal.status === "WON").reduce((total, deal) => total + Number(deal.value), 0);
 
-const sortByUpdatedAt = (deals: readonly DealDto[]) =>
+export const sortByUpdatedAt = (deals: readonly DealDto[]) =>
   [...deals].sort((first, second) => new Date(second.updatedAt).getTime() - new Date(first.updatedAt).getTime());
 
-const buildSellerRows = (sellers: readonly SellerDto[], deals: readonly DealDto[]) =>
+export const buildSellerRows = (sellers: readonly SellerDto[], deals: readonly DealDto[]) =>
   sellers
     .map((seller) => {
       const sellerDeals = deals.filter((deal) => deal.sellerId === seller.id);

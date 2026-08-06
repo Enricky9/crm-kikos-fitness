@@ -35,6 +35,7 @@ import { DealDetailsPage } from "../features/deals/DealDetailsPage";
 import { CreateLeadPage } from "../features/leads/CreateLeadPage";
 import { LeadDetailsPage } from "../features/leads/LeadDetailsPage";
 import { LeadListPage } from "../features/leads/LeadListPage";
+import { SellersPage } from "../features/sellers/SellersPage";
 
 const sidebarWidth = 264;
 
@@ -217,7 +218,7 @@ export const AppShell = () => {
           <Route path="/leads" element={<LeadListPage />} />
           <Route path="/leads/new" element={<CreateLeadPage />} />
           <Route path="/leads/:leadId" element={<LeadDetailsPage />} />
-          <Route path="/sellers" element={<Placeholder title="Vendedores" />} />
+          <Route path="/sellers" element={<SellersPage />} />
           <Route path="*" element={<Placeholder title="Pagina nao encontrada" />} />
         </Routes>
         </Box>
