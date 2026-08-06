@@ -33,6 +33,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
+import { EmptyState } from "../../ui/EmptyState";
 import { getDealStatusChipSx } from "../../ui/status-chip";
 import { formatCurrency, formatDateTime } from "../../utils/format";
 import { changeDealStatusRequest, listDealsRequest, loseDealRequest, winDealRequest } from "./deals-api";
@@ -302,9 +303,7 @@ const DealColumn = ({ deals, isLoading, onStatusChange, status, statusMutationPe
         {isLoading ? <ColumnSkeleton /> : null}
 
         {!isLoading && deals.length === 0 ? (
-          <Typography color="text.secondary" minHeight={96} variant="body2">
-            Nenhum negocio nesta etapa.
-          </Typography>
+          <EmptyState minHeight={112} title="Nenhum negocio nesta etapa." />
         ) : null}
 
         {!isLoading

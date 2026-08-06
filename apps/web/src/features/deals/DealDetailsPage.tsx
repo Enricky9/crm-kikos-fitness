@@ -35,6 +35,7 @@ import { createCommentSchema, dealStatusLabels, type CreateCommentDto, type Deal
 
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
+import { EmptyState } from "../../ui/EmptyState";
 import { getDealStatusChipSx } from "../../ui/status-chip";
 import { formatCurrency, formatDateTime } from "../../utils/format";
 import {
@@ -337,12 +338,10 @@ export const DealDetailsPage = () => {
               </Paper>
 
               {deal.comments.length === 0 ? (
-                <Box py={3} textAlign="center">
-                  <Typography fontWeight={700}>Nenhum comentario registrado.</Typography>
-                  <Typography color="text.secondary" variant="body2">
-                    Use o campo acima para registrar a proxima interacao.
-                  </Typography>
-                </Box>
+                <EmptyState
+                  description="Use o campo acima para registrar a proxima interacao."
+                  title="Nenhum comentario registrado."
+                />
               ) : null}
 
               <List disablePadding>
@@ -385,7 +384,7 @@ export const DealDetailsPage = () => {
               Historico de status
             </Typography>
             {deal.statusHistory.length === 0 ? (
-              <Typography color="text.secondary">Nenhum historico registrado.</Typography>
+              <EmptyState minHeight={96} title="Nenhum historico registrado." />
             ) : null}
             <List disablePadding>
               {deal.statusHistory.map((history) => (

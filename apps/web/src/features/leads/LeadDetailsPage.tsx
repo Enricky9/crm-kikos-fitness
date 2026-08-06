@@ -25,6 +25,7 @@ import { createCommentSchema, dealStatusLabels, type CreateCommentDto } from "@k
 
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
+import { EmptyState } from "../../ui/EmptyState";
 import { getDealStatusChipSx } from "../../ui/status-chip";
 import { formatCurrency, formatDateTime } from "../../utils/format";
 import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "./leads-api";
@@ -208,12 +209,10 @@ export const LeadDetailsPage = () => {
               {commentsQuery.isLoading ? <Skeleton variant="rounded" height={96} /> : null}
               {commentsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os comentarios.</Alert> : null}
               {commentsQuery.data?.comments.length === 0 ? (
-                <Box py={3} textAlign="center">
-                  <Typography fontWeight={700}>Nenhum comentario registrado.</Typography>
-                  <Typography color="text.secondary" variant="body2">
-                    Use o campo acima para registrar uma interacao com o lead.
-                  </Typography>
-                </Box>
+                <EmptyState
+                  description="Use o campo acima para registrar uma interacao com o lead."
+                  title="Nenhum comentario registrado."
+                />
               ) : null}
               <List disablePadding>
                 {commentsQuery.data?.comments.map((comment) => (
@@ -270,12 +269,10 @@ export const LeadDetailsPage = () => {
             {dealsQuery.isLoading ? <Skeleton variant="rounded" height={96} /> : null}
             {dealsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os negocios.</Alert> : null}
             {dealsQuery.data?.data.length === 0 ? (
-              <Box py={3} textAlign="center">
-                <Typography fontWeight={700}>Nenhum negocio relacionado.</Typography>
-                <Typography color="text.secondary" variant="body2">
-                  Crie uma oportunidade a partir deste lead.
-                </Typography>
-              </Box>
+              <EmptyState
+                description="Crie uma oportunidade a partir deste lead."
+                title="Nenhum negocio relacionado."
+              />
             ) : null}
             <Stack spacing={1.5}>
               {dealsQuery.data?.data.map((deal) => (

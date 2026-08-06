@@ -27,6 +27,7 @@ import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import { useAuth } from "../../auth/AuthContext";
+import { EmptyState } from "../../ui/EmptyState";
 import { formatDateTime } from "../../utils/format";
 import { listLeadsRequest } from "./leads-api";
 
@@ -252,12 +253,11 @@ export const LeadListPage = () => {
             {leadsQuery.data?.data.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7}>
-                  <Box py={6} textAlign="center">
-                    <Typography fontWeight={700}>Nenhum lead encontrado.</Typography>
-                    <Typography color="text.secondary" variant="body2">
-                      Ajuste a busca ou crie um novo lead.
-                    </Typography>
-                  </Box>
+                  <EmptyState
+                    description="Ajuste a busca ou crie um novo lead."
+                    minHeight={140}
+                    title="Nenhum lead encontrado."
+                  />
                 </TableCell>
               </TableRow>
             ) : null}
