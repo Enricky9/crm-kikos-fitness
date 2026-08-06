@@ -38,13 +38,39 @@ import { changeDealStatusRequest, listDealsRequest, loseDealRequest, winDealRequ
 
 const boardStatuses = ["NEW", "IN_PROGRESS", "PROPOSAL", "WON", "LOST"] as const satisfies readonly DealStatus[];
 
-const statusTone: Record<DealStatus, "default" | "primary" | "secondary" | "success" | "error"> = {
-  NEW: "default",
-  IN_PROGRESS: "primary",
-  PROPOSAL: "secondary",
-  WON: "success",
-  LOST: "error"
+const statusStyle: Record<DealStatus, { readonly bg: string; readonly border: string; readonly color: string }> = {
+  NEW: {
+    bg: "rgba(154, 154, 165, 0.12)",
+    border: "rgba(154, 154, 165, 0.32)",
+    color: "#D7D7DE"
+  },
+  IN_PROGRESS: {
+    bg: "rgba(255, 77, 45, 0.14)",
+    border: "rgba(255, 77, 45, 0.42)",
+    color: "#FFB8A8"
+  },
+  PROPOSAL: {
+    bg: "rgba(111, 168, 255, 0.14)",
+    border: "rgba(111, 168, 255, 0.36)",
+    color: "#B8D3FF"
+  },
+  WON: {
+    bg: "rgba(61, 220, 151, 0.14)",
+    border: "rgba(61, 220, 151, 0.38)",
+    color: "#9FF0CC"
+  },
+  LOST: {
+    bg: "rgba(255, 99, 99, 0.14)",
+    border: "rgba(255, 99, 99, 0.38)",
+    color: "#FFB3B3"
+  }
 };
+
+const statusChipSx = (status: DealStatus) => ({
+  bgcolor: statusStyle[status].bg,
+  borderColor: statusStyle[status].border,
+  color: statusStyle[status].color
+});
 
 const nextStatusOptions: Record<DealStatus, readonly DealStatus[]> = {
   NEW: ["NEW", "IN_PROGRESS", "LOST"],
@@ -191,48 +217,60 @@ export const DealBoardPage = () => {
         </Button>
       </Stack>
 
-      <TextField
-        fullWidth
-        label="Buscar negocios"
-        onChange={(event) => {
-          setSearch(event.target.value);
+      <Paper
+        elevation={0}
+        sx={{
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+          p: { xs: 1.5, md: 2 }
         }}
-        placeholder="Titulo do negocio"
-        value={search}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          )
-        }}
-      />
+      >
+        <TextField
+          fullWidth
+          label="Buscar negocios"
+          onChange={(event) => {
+            setSearch(event.target.value);
+          }}
+          placeholder="Titulo do negocio"
+          value={search}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            )
+          }}
+        />
+      </Paper>
 
       {dealsQuery.isError ? <Alert severity="error">{getErrorMessage(dealsQuery.error)}</Alert> : null}
 
       <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-        <Box
-          sx={{
-            display: "grid",
-            gap: 2,
-            gridTemplateColumns: {
-              xs: "1fr",
-              md: "repeat(2, minmax(0, 1fr))",
-              xl: "repeat(5, minmax(220px, 1fr))"
-            },
-            alignItems: "start"
-          }}
-        >
-          {boardStatuses.map((status) => (
-            <DealColumn
-              deals={board[status]}
-              isLoading={dealsQuery.isLoading}
-              key={status}
-              onStatusChange={handleStatusChange}
-              status={status}
-              statusMutationPending={statusMutation.isPending}
-            />
-          ))}
+        <Box sx={{ overflowX: { xs: "auto", md: "visible" }, pb: 1 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 2,
+              gridTemplateColumns: {
+                xs: `repeat(${boardStatuses.length}, minmax(280px, 82vw))`,
+                md: "repeat(2, minmax(0, 1fr))",
+                xl: "repeat(5, minmax(220px, 1fr))"
+              },
+              alignItems: "start"
+            }}
+          >
+            {boardStatuses.map((status) => (
+              <DealColumn
+                deals={board[status]}
+                isLoading={dealsQuery.isLoading}
+                key={status}
+                onStatusChange={handleStatusChange}
+                status={status}
+                statusMutationPending={statusMutation.isPending}
+              />
+            ))}
+          </Box>
         </Box>
       </DndContext>
 
@@ -267,9 +305,11 @@ const DealColumn = ({ deals, isLoading, onStatusChange, status, statusMutationPe
       sx={{
         border: 1,
         borderColor: isOver ? "primary.main" : "divider",
-        bgcolor: isOver ? "action.hover" : "background.paper",
-        minHeight: 360,
-        p: 2
+        bgcolor: isOver ? "rgba(255, 77, 45, 0.08)" : "#111115",
+        boxShadow: isOver ? "0 18px 48px rgba(255, 77, 45, 0.14)" : "0 14px 32px rgba(0, 0, 0, 0.18)",
+        minHeight: 420,
+        p: 2,
+        transition: "border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease"
       }}
     >
       <Stack spacing={2}>
@@ -277,7 +317,17 @@ const DealColumn = ({ deals, isLoading, onStatusChange, status, statusMutationPe
           <Typography component="h2" variant="subtitle1">
             {dealStatusLabels[status]}
           </Typography>
-          <Chip color={statusTone[status]} label={deals.length} size="small" />
+          <Chip
+            label={deals.length}
+            size="small"
+            sx={{
+              bgcolor: "rgba(255, 77, 45, 0.14)",
+              borderColor: "rgba(255, 77, 45, 0.38)",
+              color: "text.primary",
+              minWidth: 36
+            }}
+            variant="outlined"
+          />
         </Stack>
 
         <Divider />
@@ -332,9 +382,16 @@ const DealCard = ({ deal, disabled, onStatusChange }: DealCardProps) => {
       sx={{
         border: 1,
         borderColor: "divider",
+        bgcolor: "background.paper",
+        boxShadow: "0 12px 28px rgba(0, 0, 0, 0.2)",
         cursor: disabled ? "default" : "grab",
         p: 2,
-        touchAction: "none"
+        touchAction: "none",
+        transition: "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
+        "&:hover": {
+          borderColor: "primary.main",
+          boxShadow: "0 18px 42px rgba(255, 77, 45, 0.16)"
+        }
       }}
       {...listeners}
       {...attributes}
@@ -362,7 +419,7 @@ const DealCard = ({ deal, disabled, onStatusChange }: DealCardProps) => {
         </Stack>
 
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          <Chip color={statusTone[deal.status]} label={dealStatusLabels[deal.status]} size="small" />
+          <Chip label={dealStatusLabels[deal.status]} size="small" sx={statusChipSx(deal.status)} variant="outlined" />
           <Chip label={formatCurrency(Number(deal.value))} size="small" variant="outlined" />
         </Stack>
 
