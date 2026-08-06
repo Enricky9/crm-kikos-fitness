@@ -1,4 +1,4 @@
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -8,29 +8,9 @@ import { AuthProvider } from "./auth/AuthContext";
 import { RequireAuth } from "./auth/RequireAuth";
 import { LoginPage } from "./features/auth/LoginPage";
 import { AppShell } from "./ui/AppShell";
+import { theme } from "./ui/theme";
 
 const queryClient = new QueryClient();
-
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: {
-      main: "#146c5f"
-    },
-    secondary: {
-      main: "#d1495b"
-    },
-    background: {
-      default: "#f7f7f4"
-    }
-  },
-  shape: {
-    borderRadius: 8
-  },
-  typography: {
-    fontFamily: ["Inter", "Roboto", "Arial", "sans-serif"].join(",")
-  }
-});
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
