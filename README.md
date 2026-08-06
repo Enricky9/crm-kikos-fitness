@@ -124,7 +124,7 @@ Use `.env.example` como base:
 ```text
 NODE_ENV=development
 PORT=3333
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kikos_crm
+DATABASE_URL=postgresql://postgres:postgres@localhost:55432/kikos_crm
 JWT_SECRET=change-me-in-development
 JWT_EXPIRES_IN=8h
 CORS_ORIGIN=http://localhost:5173
@@ -264,7 +264,7 @@ As variaveis `AI_PROVIDER`, `AI_API_KEY` e `AI_MODEL` ja estao previstas no ambi
 - O OpenAPI foi implementado como documento estatico para cobrir rapidamente os contratos reais; uma evolucao seria gerar schemas automaticamente a partir dos schemas Zod.
 - O board busca ate 100 negocios para montar o Kanban em uma unica chamada.
 - Os seletores de leads na criacao de negocio buscam ate 100 leads, sem autocomplete paginado.
-- Neste ambiente, Docker nao esta disponivel, entao migrations e seed nao foram validados contra um PostgreSQL real aqui.
+- O PostgreSQL do Docker usa a porta `55432` no host para evitar conflito com instalacoes locais que ja usam `5432`.
 - O build do frontend passa, mas o Vite avisa que o bundle esta acima de 500 kB; code splitting pode melhorar isso.
 
 ## Melhorias Futuras
