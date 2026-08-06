@@ -18,7 +18,6 @@ import {
   MenuItem,
   Paper,
   Select,
-  Skeleton,
   Snackbar,
   Stack,
   TextField,
@@ -34,6 +33,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
 import { EmptyState } from "../../ui/EmptyState";
+import { LoadingState } from "../../ui/LoadingState";
 import { getDealStatusChipSx } from "../../ui/status-chip";
 import { formatCurrency, formatDateTime } from "../../utils/format";
 import { changeDealStatusRequest, listDealsRequest, loseDealRequest, winDealRequest } from "./deals-api";
@@ -322,10 +322,7 @@ const DealColumn = ({ deals, isLoading, onStatusChange, status, statusMutationPe
 };
 
 const ColumnSkeleton = () => (
-  <Stack spacing={1.5}>
-    <Skeleton height={128} variant="rounded" />
-    <Skeleton height={128} variant="rounded" />
-  </Stack>
+  <LoadingState blocks={[{ height: 128 }, { height: 128 }]} />
 );
 
 type DealCardProps = {

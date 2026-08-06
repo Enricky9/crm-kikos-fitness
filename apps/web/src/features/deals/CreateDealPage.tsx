@@ -10,7 +10,6 @@ import {
   MenuItem,
   Paper,
   Select,
-  Skeleton,
   Stack,
   TextField,
   Typography
@@ -24,6 +23,7 @@ import { createDealSchema, dealStatusLabels, type CreateDealDto, type OpenDealSt
 
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
+import { LoadingState } from "../../ui/LoadingState";
 import { listLeadsRequest } from "../leads/leads-api";
 import { createDealRequest, listSellersRequest } from "./deals-api";
 
@@ -124,7 +124,7 @@ export const CreateDealPage = () => {
         <Stack spacing={3}>
           {optionsError ? <Alert severity="error">{optionsError}</Alert> : null}
           {mutationError ? <Alert severity="error">{mutationError}</Alert> : null}
-          {isLoadingOptions ? <Skeleton height={80} variant="rounded" /> : null}
+          {isLoadingOptions ? <LoadingState blocks={[{ height: 80 }]} /> : null}
 
           <Box
             sx={{

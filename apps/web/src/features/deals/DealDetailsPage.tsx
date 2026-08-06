@@ -21,7 +21,6 @@ import {
   MenuItem,
   Paper,
   Select,
-  Skeleton,
   Stack,
   TextField,
   Typography
@@ -36,6 +35,7 @@ import { createCommentSchema, dealStatusLabels, type CreateCommentDto, type Deal
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
 import { EmptyState } from "../../ui/EmptyState";
+import { LoadingState } from "../../ui/LoadingState";
 import { getDealStatusChipSx } from "../../ui/status-chip";
 import { formatCurrency, formatDateTime } from "../../utils/format";
 import {
@@ -120,9 +120,7 @@ export const DealDetailsPage = () => {
   if (dealQuery.isLoading) {
     return (
       <Stack spacing={2}>
-        <Skeleton width={280} height={48} />
-        <Skeleton variant="rectangular" height={220} />
-        <Skeleton variant="rectangular" height={180} />
+        <LoadingState blocks={[{ height: 48, width: 280 }, { height: 220 }, { height: 180 }]} />
       </Stack>
     );
   }

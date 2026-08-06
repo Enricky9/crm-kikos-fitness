@@ -12,7 +12,6 @@ import {
   ListItem,
   ListItemText,
   Paper,
-  Skeleton,
   Stack,
   TextField,
   Typography
@@ -26,6 +25,7 @@ import { createCommentSchema, dealStatusLabels, type CreateCommentDto } from "@k
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
 import { EmptyState } from "../../ui/EmptyState";
+import { LoadingState } from "../../ui/LoadingState";
 import { getDealStatusChipSx } from "../../ui/status-chip";
 import { formatCurrency, formatDateTime } from "../../utils/format";
 import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "./leads-api";
@@ -81,8 +81,7 @@ export const LeadDetailsPage = () => {
   if (leadQuery.isLoading) {
     return (
       <Stack spacing={2}>
-        <Skeleton width={240} height={48} />
-        <Skeleton variant="rectangular" height={180} />
+        <LoadingState blocks={[{ height: 48, width: 240 }, { height: 180 }]} />
       </Stack>
     );
   }
@@ -206,7 +205,7 @@ export const LeadDetailsPage = () => {
                   </Stack>
                 </Stack>
               </Paper>
-              {commentsQuery.isLoading ? <Skeleton variant="rounded" height={96} /> : null}
+              {commentsQuery.isLoading ? <LoadingState blocks={[{ height: 96 }]} /> : null}
               {commentsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os comentarios.</Alert> : null}
               {commentsQuery.data?.comments.length === 0 ? (
                 <EmptyState
@@ -266,7 +265,7 @@ export const LeadDetailsPage = () => {
                 variant="outlined"
               />
             </Stack>
-            {dealsQuery.isLoading ? <Skeleton variant="rounded" height={96} /> : null}
+            {dealsQuery.isLoading ? <LoadingState blocks={[{ height: 96 }]} /> : null}
             {dealsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os negocios.</Alert> : null}
             {dealsQuery.data?.data.length === 0 ? (
               <EmptyState
