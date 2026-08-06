@@ -28,6 +28,7 @@ import { Link as RouterLink, Route, Routes, useLocation, useNavigate } from "rea
 import { useState } from "react";
 
 import { useAuth } from "../auth/AuthContext";
+import { DashboardPage } from "../features/dashboard/DashboardPage";
 import { CreateDealPage } from "../features/deals/CreateDealPage";
 import { DealBoardPage } from "../features/deals/DealBoardPage";
 import { DealDetailsPage } from "../features/deals/DealDetailsPage";
@@ -209,7 +210,7 @@ export const AppShell = () => {
           }}
         >
         <Routes>
-          <Route path="/dashboard" element={<Placeholder title="Dashboard" />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/deals/board" element={<DealBoardPage />} />
           <Route path="/deals/new" element={<CreateDealPage />} />
           <Route path="/deals/:dealId" element={<DealDetailsPage />} />
