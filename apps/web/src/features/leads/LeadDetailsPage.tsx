@@ -21,10 +21,11 @@ import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/rea
 import { Controller, useForm } from "react-hook-form";
 import { Link as RouterLink, useParams } from "react-router-dom";
 
-import { createCommentSchema, dealStatusLabels, type CreateCommentDto, type DealStatus } from "@kikos/shared";
+import { createCommentSchema, dealStatusLabels, type CreateCommentDto } from "@kikos/shared";
 
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
+import { getDealStatusChipSx } from "../../ui/status-chip";
 import { formatCurrency, formatDateTime } from "../../utils/format";
 import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "./leads-api";
 
@@ -35,40 +36,6 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 
   return fallback;
 };
-
-const statusStyle: Record<DealStatus, { readonly bg: string; readonly border: string; readonly color: string }> = {
-  NEW: {
-    bg: "rgba(154, 154, 165, 0.12)",
-    border: "rgba(154, 154, 165, 0.32)",
-    color: "#D7D7DE"
-  },
-  IN_PROGRESS: {
-    bg: "rgba(255, 77, 45, 0.14)",
-    border: "rgba(255, 77, 45, 0.42)",
-    color: "#FFB8A8"
-  },
-  PROPOSAL: {
-    bg: "rgba(111, 168, 255, 0.14)",
-    border: "rgba(111, 168, 255, 0.36)",
-    color: "#B8D3FF"
-  },
-  WON: {
-    bg: "rgba(61, 220, 151, 0.14)",
-    border: "rgba(61, 220, 151, 0.38)",
-    color: "#9FF0CC"
-  },
-  LOST: {
-    bg: "rgba(255, 99, 99, 0.14)",
-    border: "rgba(255, 99, 99, 0.38)",
-    color: "#FFB3B3"
-  }
-};
-
-const statusChipSx = (status: DealStatus) => ({
-  bgcolor: statusStyle[status].bg,
-  borderColor: statusStyle[status].border,
-  color: statusStyle[status].color
-});
 
 export const LeadDetailsPage = () => {
   const { leadId } = useParams<{ leadId: string }>();
@@ -332,7 +299,12 @@ export const LeadDetailsPage = () => {
                       <Typography fontWeight={700}>{deal.title}</Typography>
                       <Typography color="text.secondary">{formatCurrency(deal.value)}</Typography>
                     </Box>
-                    <Chip label={dealStatusLabels[deal.status]} size="small" sx={statusChipSx(deal.status)} variant="outlined" />
+                    <Chip
+                      label={dealStatusLabels[deal.status]}
+                      size="small"
+                      sx={getDealStatusChipSx(deal.status)}
+                      variant="outlined"
+                    />
                   </Stack>
                 </Paper>
               ))}

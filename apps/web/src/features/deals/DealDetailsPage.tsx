@@ -35,6 +35,7 @@ import { createCommentSchema, dealStatusLabels, type CreateCommentDto, type Deal
 
 import { HttpError } from "../../api/http";
 import { useAuth } from "../../auth/AuthContext";
+import { getDealStatusChipSx } from "../../ui/status-chip";
 import { formatCurrency, formatDateTime } from "../../utils/format";
 import {
   changeDealStatusRequest,
@@ -52,40 +53,6 @@ const statusOptions: Record<DealStatus, readonly DealStatus[]> = {
   WON: ["WON"],
   LOST: ["LOST"]
 };
-
-const statusStyle: Record<DealStatus, { readonly bg: string; readonly border: string; readonly color: string }> = {
-  NEW: {
-    bg: "rgba(154, 154, 165, 0.12)",
-    border: "rgba(154, 154, 165, 0.32)",
-    color: "#D7D7DE"
-  },
-  IN_PROGRESS: {
-    bg: "rgba(255, 77, 45, 0.14)",
-    border: "rgba(255, 77, 45, 0.42)",
-    color: "#FFB8A8"
-  },
-  PROPOSAL: {
-    bg: "rgba(111, 168, 255, 0.14)",
-    border: "rgba(111, 168, 255, 0.36)",
-    color: "#B8D3FF"
-  },
-  WON: {
-    bg: "rgba(61, 220, 151, 0.14)",
-    border: "rgba(61, 220, 151, 0.38)",
-    color: "#9FF0CC"
-  },
-  LOST: {
-    bg: "rgba(255, 99, 99, 0.14)",
-    border: "rgba(255, 99, 99, 0.38)",
-    color: "#FFB3B3"
-  }
-};
-
-const statusChipSx = (status: DealStatus) => ({
-  bgcolor: statusStyle[status].bg,
-  borderColor: statusStyle[status].border,
-  color: statusStyle[status].color
-});
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof HttpError) {
@@ -268,7 +235,7 @@ export const DealDetailsPage = () => {
           >
             <Stack spacing={2}>
               <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-                <Chip label={dealStatusLabels[deal.status]} sx={statusChipSx(deal.status)} variant="outlined" />
+                <Chip label={dealStatusLabels[deal.status]} sx={getDealStatusChipSx(deal.status)} variant="outlined" />
                 <Chip
                   label={formatCurrency(Number(deal.value))}
                   sx={{ bgcolor: "rgba(154, 154, 165, 0.12)", color: "text.primary" }}
