@@ -13,7 +13,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControl,
   InputLabel,
   List,
@@ -54,13 +53,39 @@ const statusOptions: Record<DealStatus, readonly DealStatus[]> = {
   LOST: ["LOST"]
 };
 
-const statusTone: Record<DealStatus, "default" | "primary" | "secondary" | "success" | "error"> = {
-  NEW: "default",
-  IN_PROGRESS: "primary",
-  PROPOSAL: "secondary",
-  WON: "success",
-  LOST: "error"
+const statusStyle: Record<DealStatus, { readonly bg: string; readonly border: string; readonly color: string }> = {
+  NEW: {
+    bg: "rgba(154, 154, 165, 0.12)",
+    border: "rgba(154, 154, 165, 0.32)",
+    color: "#D7D7DE"
+  },
+  IN_PROGRESS: {
+    bg: "rgba(255, 77, 45, 0.14)",
+    border: "rgba(255, 77, 45, 0.42)",
+    color: "#FFB8A8"
+  },
+  PROPOSAL: {
+    bg: "rgba(111, 168, 255, 0.14)",
+    border: "rgba(111, 168, 255, 0.36)",
+    color: "#B8D3FF"
+  },
+  WON: {
+    bg: "rgba(61, 220, 151, 0.14)",
+    border: "rgba(61, 220, 151, 0.38)",
+    color: "#9FF0CC"
+  },
+  LOST: {
+    bg: "rgba(255, 99, 99, 0.14)",
+    border: "rgba(255, 99, 99, 0.38)",
+    color: "#FFB3B3"
+  }
 };
+
+const statusChipSx = (status: DealStatus) => ({
+  bgcolor: statusStyle[status].bg,
+  borderColor: statusStyle[status].border,
+  color: statusStyle[status].color
+});
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof HttpError) {
@@ -175,7 +200,7 @@ export const DealDetailsPage = () => {
   return (
     <Stack spacing={3}>
       <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between">
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack spacing={1.5}>
           <Button component={RouterLink} startIcon={<ArrowBackIcon />} to="/deals/board" variant="text">
             Voltar
           </Button>
@@ -222,117 +247,202 @@ export const DealDetailsPage = () => {
 
       {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
 
-      <Paper elevation={0} sx={{ border: 1, borderColor: "divider", p: { xs: 2, md: 3 } }}>
+      <Box
+        sx={{
+          alignItems: "start",
+          display: "grid",
+          gap: 2,
+          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 360px" }
+        }}
+      >
         <Stack spacing={2}>
-          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-            <Chip color={statusTone[deal.status]} label={dealStatusLabels[deal.status]} />
-            <Chip label={formatCurrency(Number(deal.value))} variant="outlined" />
-          </Stack>
-
-          <Typography color="text.secondary">{deal.description ?? "Sem descricao."}</Typography>
-
-          <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
-            <Info label="Lead" value={deal.lead?.name ?? "-"} />
-            <Info label="Empresa" value={deal.lead?.company ?? "-"} />
-            <Info label="Vendedor" value={deal.seller?.name ?? "-"} />
-            <Info label="Criado em" value={formatDateTime(deal.createdAt)} />
-            <Info label="Atualizado em" value={formatDateTime(deal.updatedAt)} />
-            <Info label="Fechado em" value={deal.closedAt ? formatDateTime(deal.closedAt) : "-"} />
-          </Stack>
-
-          {deal.lostReason ? <Alert severity="warning">Motivo da perda: {deal.lostReason}</Alert> : null}
-
-          <FormControl fullWidth sx={{ maxWidth: 360 }}>
-            <InputLabel id="deal-status-label">Alterar status</InputLabel>
-            <Select
-              disabled={statusMutation.isPending || isClosed}
-              label="Alterar status"
-              labelId="deal-status-label"
-              onChange={(event) => {
-                handleStatusChange(event.target.value as DealStatus);
-              }}
-              value={deal.status}
-            >
-              {statusOptions[deal.status].map((status) => (
-                <MenuItem key={status} value={status}>
-                  {dealStatusLabels[status]}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Stack>
-      </Paper>
-
-      <Paper elevation={0} sx={{ border: 1, borderColor: "divider", p: { xs: 2, md: 3 } }}>
-        <Stack spacing={2}>
-          <Typography component="h2" variant="h6">
-            Comentarios
-          </Typography>
-
           <Paper
-            component="form"
             elevation={0}
-            onSubmit={(event) => {
-              void submitComment(event);
+            sx={{
+              bgcolor: "background.paper",
+              border: 1,
+              borderColor: "divider",
+              boxShadow: "0 18px 44px rgba(0, 0, 0, 0.22)",
+              p: { xs: 2, md: 3 }
             }}
-            sx={{ border: 1, borderColor: "divider", p: 2 }}
           >
             <Stack spacing={2}>
-              <Controller
-                control={commentForm.control}
-                name="content"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    error={Boolean(fieldState.error)}
-                    fullWidth
-                    helperText={fieldState.error?.message}
-                    label="Novo comentario"
-                    multiline
-                    minRows={3}
-                  />
-                )}
-              />
-              <Button
-                disabled={commentMutation.isPending}
-                startIcon={commentMutation.isPending ? <SaveIcon /> : <SendIcon />}
-                type="submit"
-                variant="contained"
+              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                <Chip label={dealStatusLabels[deal.status]} sx={statusChipSx(deal.status)} variant="outlined" />
+                <Chip
+                  label={formatCurrency(Number(deal.value))}
+                  sx={{ bgcolor: "rgba(154, 154, 165, 0.12)", color: "text.primary" }}
+                  variant="outlined"
+                />
+              </Stack>
+
+              <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
+                {deal.description ?? "Sem descricao."}
+              </Typography>
+
+              {deal.lostReason ? <Alert severity="warning">Motivo da perda: {deal.lostReason}</Alert> : null}
+
+              <Box
+                sx={{
+                  display: "grid",
+                  gap: 1.5,
+                  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" }
+                }}
               >
-                {commentMutation.isPending ? "Salvando..." : "Adicionar comentario"}
-              </Button>
+                <Info label="Lead" value={deal.lead?.name ?? "-"} />
+                <Info label="Empresa" value={deal.lead?.company ?? "-"} />
+                <Info label="Vendedor" value={deal.seller?.name ?? "-"} />
+                <Info label="Criado em" value={formatDateTime(deal.createdAt)} />
+                <Info label="Atualizado em" value={formatDateTime(deal.updatedAt)} />
+                <Info label="Fechado em" value={deal.closedAt ? formatDateTime(deal.closedAt) : "-"} />
+              </Box>
+
+              <FormControl fullWidth sx={{ maxWidth: 360 }}>
+                <InputLabel id="deal-status-label">Alterar status</InputLabel>
+                <Select
+                  disabled={statusMutation.isPending || isClosed}
+                  label="Alterar status"
+                  labelId="deal-status-label"
+                  onChange={(event) => {
+                    handleStatusChange(event.target.value as DealStatus);
+                  }}
+                  value={deal.status}
+                >
+                  {statusOptions[deal.status].map((status) => (
+                    <MenuItem key={status} value={status}>
+                      {dealStatusLabels[status]}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Stack>
           </Paper>
 
-          {deal.comments.length === 0 ? <Typography color="text.secondary">Nenhum comentario registrado.</Typography> : null}
+          <Paper
+            elevation={0}
+            sx={{
+              bgcolor: "background.paper",
+              border: 1,
+              borderColor: "divider",
+              p: { xs: 2, md: 3 }
+            }}
+          >
+            <Stack spacing={2}>
+              <Typography component="h2" variant="h6">
+                Comentarios
+              </Typography>
 
-          <List disablePadding>
-            {deal.comments.map((comment, index) => (
-              <Box key={comment.id}>
-                {index > 0 ? <Divider /> : null}
-                <ListItem disableGutters alignItems="flex-start">
-                  <ListItemText
-                    primary={comment.content}
-                    secondary={`${comment.author?.name ?? "Autor"} - ${formatDateTime(comment.createdAt)}`}
+              <Paper
+                component="form"
+                elevation={0}
+                onSubmit={(event) => {
+                  void submitComment(event);
+                }}
+                sx={{ bgcolor: "#111115", border: 1, borderColor: "divider", p: 2 }}
+              >
+                <Stack spacing={2}>
+                  <Controller
+                    control={commentForm.control}
+                    name="content"
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        error={Boolean(fieldState.error)}
+                        fullWidth
+                        helperText={fieldState.error?.message}
+                        label="Novo comentario"
+                        multiline
+                        minRows={3}
+                      />
+                    )}
                   />
-                </ListItem>
-              </Box>
-            ))}
-          </List>
-        </Stack>
-      </Paper>
+                  <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-end">
+                    <Button
+                      disabled={commentMutation.isPending}
+                      startIcon={commentMutation.isPending ? <SaveIcon /> : <SendIcon />}
+                      type="submit"
+                      variant="contained"
+                    >
+                      {commentMutation.isPending ? "Salvando..." : "Adicionar comentario"}
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Paper>
 
-      <Paper elevation={0} sx={{ border: 1, borderColor: "divider", p: { xs: 2, md: 3 } }}>
-        <Stack spacing={2}>
-          <Typography component="h2" variant="h6">
-            Historico de status
-          </Typography>
-          {deal.statusHistory.length === 0 ? <Typography color="text.secondary">Nenhum historico registrado.</Typography> : null}
-          <List disablePadding>
-            {deal.statusHistory.map((history, index) => (
-              <Box key={history.id}>
-                {index > 0 ? <Divider /> : null}
-                <ListItem disableGutters>
+              {deal.comments.length === 0 ? (
+                <Box py={3} textAlign="center">
+                  <Typography fontWeight={700}>Nenhum comentario registrado.</Typography>
+                  <Typography color="text.secondary" variant="body2">
+                    Use o campo acima para registrar a proxima interacao.
+                  </Typography>
+                </Box>
+              ) : null}
+
+              <List disablePadding>
+                {deal.comments.map((comment) => (
+                  <ListItem
+                    alignItems="flex-start"
+                    key={comment.id}
+                    sx={{
+                      border: 1,
+                      borderColor: "divider",
+                      borderRadius: 1,
+                      mb: 1,
+                      px: 2
+                    }}
+                  >
+                    <ListItemText
+                      primary={comment.content}
+                      secondary={`${comment.author?.name ?? "Autor"} - ${formatDateTime(comment.createdAt)}`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Stack>
+          </Paper>
+        </Stack>
+
+        <Paper
+          elevation={0}
+          sx={{
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            p: { xs: 2, md: 3 },
+            position: { lg: "sticky" },
+            top: { lg: 24 }
+          }}
+        >
+          <Stack spacing={2}>
+            <Typography component="h2" variant="h6">
+              Historico de status
+            </Typography>
+            {deal.statusHistory.length === 0 ? (
+              <Typography color="text.secondary">Nenhum historico registrado.</Typography>
+            ) : null}
+            <List disablePadding>
+              {deal.statusHistory.map((history) => (
+                <ListItem
+                  disableGutters
+                  key={history.id}
+                  sx={{
+                    alignItems: "flex-start",
+                    gap: 1.5,
+                    py: 1.25
+                  }}
+                >
+                  <Box
+                    aria-hidden
+                    sx={{
+                      bgcolor: "primary.main",
+                      borderRadius: "50%",
+                      boxShadow: "0 0 0 5px rgba(255, 77, 45, 0.12)",
+                      flexShrink: 0,
+                      height: 8,
+                      mt: 1,
+                      width: 8
+                    }}
+                  />
                   <ListItemText
                     primary={`${history.fromStatus ? dealStatusLabels[history.fromStatus] : "Criacao"} -> ${
                       dealStatusLabels[history.toStatus]
@@ -340,11 +450,11 @@ export const DealDetailsPage = () => {
                     secondary={`${history.changedByUser?.name ?? "Usuario"} - ${formatDateTime(history.createdAt)}`}
                   />
                 </ListItem>
-              </Box>
-            ))}
-          </List>
-        </Stack>
-      </Paper>
+              ))}
+            </List>
+          </Stack>
+        </Paper>
+      </Box>
 
       <Dialog
         fullWidth
@@ -387,10 +497,21 @@ export const DealDetailsPage = () => {
 };
 
 const Info = ({ label, value }: { readonly label: string; readonly value: string }) => (
-  <Box minWidth={150}>
+  <Box
+    sx={{
+      bgcolor: "#111115",
+      border: 1,
+      borderColor: "divider",
+      borderRadius: 1,
+      minWidth: 0,
+      p: 1.5
+    }}
+  >
     <Typography color="text.secondary" variant="body2">
       {label}
     </Typography>
-    <Typography fontWeight={700}>{value}</Typography>
+    <Typography fontWeight={700} noWrap>
+      {value}
+    </Typography>
   </Box>
 );
