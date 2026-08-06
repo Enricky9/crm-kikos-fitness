@@ -5,6 +5,7 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   IconButton,
   InputAdornment,
   Paper,
@@ -30,6 +31,14 @@ import { formatDateTime } from "../../utils/format";
 import { listLeadsRequest } from "./leads-api";
 
 const pageSizeOptions = [10, 20, 50];
+
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
 
 export const LeadListPage = () => {
   const { token } = useAuth();
@@ -72,16 +81,32 @@ export const LeadListPage = () => {
           </Typography>
           <Typography color="text.secondary">Relacionamentos comerciais em andamento.</Typography>
         </Box>
-        <Button component={RouterLink} startIcon={<AddIcon />} to="/leads/new" variant="contained">
-          Criar lead
-        </Button>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }}>
+          <Chip
+            label={`${leadsQuery.data?.pagination.total ?? 0} leads`}
+            sx={{
+              bgcolor: "rgba(255, 77, 45, 0.14)",
+              borderColor: "rgba(255, 77, 45, 0.38)",
+              color: "text.primary"
+            }}
+            variant="outlined"
+          />
+          <Button component={RouterLink} startIcon={<AddIcon />} to="/leads/new" variant="contained">
+            Criar lead
+          </Button>
+        </Stack>
       </Stack>
 
       <Paper
         component="form"
         onSubmit={handleSearchSubmit}
         elevation={0}
-        sx={{ border: 1, borderColor: "divider", p: 2 }}
+        sx={{
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+          p: { xs: 1.5, md: 2 }
+        }}
       >
         <TextField
           fullWidth
@@ -104,8 +129,17 @@ export const LeadListPage = () => {
         <Alert severity="error">Nao foi possivel carregar os leads.</Alert>
       ) : null}
 
-      <TableContainer component={Paper} elevation={0} sx={{ border: 1, borderColor: "divider" }}>
-        <Table>
+      <TableContainer
+        component={Paper}
+        elevation={0}
+        sx={{
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+          overflowX: "auto"
+        }}
+      >
+        <Table sx={{ minWidth: 920 }}>
           <TableHead>
             <TableRow>
               <TableCell>Nome</TableCell>
@@ -123,7 +157,7 @@ export const LeadListPage = () => {
                   <TableRow key={index}>
                     {Array.from({ length: 7 }).map((__, cellIndex) => (
                       <TableCell key={cellIndex}>
-                        <Skeleton />
+                        <Skeleton height={28} variant="rounded" />
                       </TableCell>
                     ))}
                   </TableRow>
@@ -131,16 +165,83 @@ export const LeadListPage = () => {
               : null}
 
             {leadsQuery.data?.data.map((lead) => (
-              <TableRow hover key={lead.id}>
-                <TableCell>{lead.name}</TableCell>
-                <TableCell>{lead.email ?? "-"}</TableCell>
+              <TableRow
+                hover
+                key={lead.id}
+                sx={{
+                  transition: "background-color 160ms ease",
+                  "&:hover": {
+                    bgcolor: "rgba(255, 77, 45, 0.06)"
+                  }
+                }}
+              >
+                <TableCell>
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box
+                      aria-hidden
+                      sx={{
+                        alignItems: "center",
+                        bgcolor: "rgba(255, 77, 45, 0.14)",
+                        border: 1,
+                        borderColor: "rgba(255, 77, 45, 0.34)",
+                        borderRadius: 1,
+                        color: "primary.main",
+                        display: "flex",
+                        flexShrink: 0,
+                        fontSize: 12,
+                        fontWeight: 800,
+                        height: 36,
+                        justifyContent: "center",
+                        width: 36
+                      }}
+                    >
+                      {getInitials(lead.name)}
+                    </Box>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography fontWeight={700} noWrap>
+                        {lead.name}
+                      </Typography>
+                      <Typography color="text.secondary" noWrap variant="body2">
+                        {lead.source ?? "Origem nao informada"}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </TableCell>
+                <TableCell sx={{ color: lead.email ? "text.primary" : "text.secondary" }}>{lead.email ?? "-"}</TableCell>
                 <TableCell>{lead.phone}</TableCell>
-                <TableCell>{lead.company ?? "-"}</TableCell>
-                <TableCell align="right">{lead.dealsCount}</TableCell>
-                <TableCell>{formatDateTime(lead.createdAt)}</TableCell>
+                <TableCell sx={{ color: lead.company ? "text.primary" : "text.secondary" }}>
+                  {lead.company ?? "-"}
+                </TableCell>
+                <TableCell align="right">
+                  <Chip
+                    label={lead.dealsCount}
+                    size="small"
+                    sx={{
+                      bgcolor: "rgba(154, 154, 165, 0.12)",
+                      borderColor: "rgba(154, 154, 165, 0.3)",
+                      color: "text.primary",
+                      minWidth: 34
+                    }}
+                    variant="outlined"
+                  />
+                </TableCell>
+                <TableCell sx={{ color: "text.secondary" }}>{formatDateTime(lead.createdAt)}</TableCell>
                 <TableCell align="right">
                   <Tooltip title="Abrir detalhes">
-                    <IconButton component={RouterLink} to={`/leads/${lead.id}`} aria-label="Abrir detalhes">
+                    <IconButton
+                      component={RouterLink}
+                      to={`/leads/${lead.id}`}
+                      aria-label="Abrir detalhes"
+                      sx={{
+                        border: 1,
+                        borderColor: "divider",
+                        color: "text.secondary",
+                        "&:hover": {
+                          borderColor: "primary.main",
+                          color: "primary.main"
+                        }
+                      }}
+                    >
                       <VisibilityIcon />
                     </IconButton>
                   </Tooltip>
@@ -151,8 +252,11 @@ export const LeadListPage = () => {
             {leadsQuery.data?.data.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7}>
-                  <Box py={4} textAlign="center">
-                    <Typography color="text.secondary">Nenhum lead encontrado.</Typography>
+                  <Box py={6} textAlign="center">
+                    <Typography fontWeight={700}>Nenhum lead encontrado.</Typography>
+                    <Typography color="text.secondary" variant="body2">
+                      Ajuste a busca ou crie um novo lead.
+                    </Typography>
                   </Box>
                 </TableCell>
               </TableRow>
