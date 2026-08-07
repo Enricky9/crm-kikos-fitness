@@ -1,5 +1,4 @@
 import type { FastifyPluginCallback } from "fastify";
-import { Effect, Either } from "effect";
 import { z } from "zod";
 
 import { createLeadSchema, leadListQuerySchema, updateLeadSchema } from "@kikos/shared";
@@ -7,6 +6,7 @@ import { createLeadSchema, leadListQuerySchema, updateLeadSchema } from "@kikos/
 import type { AuthService } from "../../auth/application/auth-service.js";
 import { authenticateRequest } from "../../auth/presentation/authenticate-request.js";
 import { ValidationError } from "../../../shared/errors/app-error.js";
+import { runRouteEffect } from "../../../shared/http/run-route-effect.js";
 import type { LeadService } from "../application/lead-service.js";
 
 type LeadRoutesOptions = {
@@ -17,16 +17,6 @@ type LeadRoutesOptions = {
 const paramsSchema = z.object({
   leadId: z.string().uuid()
 });
-
-const runRouteEffect = async <A>(effect: Effect.Effect<A, unknown>) => {
-  const result = await Effect.runPromise(Effect.either(effect));
-
-  if (Either.isLeft(result)) {
-    throw result.left;
-  }
-
-  return result.right;
-};
 
 export const registerLeadRoutes: FastifyPluginCallback<LeadRoutesOptions> = (
   server,

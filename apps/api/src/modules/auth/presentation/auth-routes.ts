@@ -1,9 +1,9 @@
 import rateLimit from "@fastify/rate-limit";
 import type { FastifyPluginAsync } from "fastify";
-import { Effect, Either } from "effect";
 import { z } from "zod";
 
 import { ValidationError } from "../../../shared/errors/app-error.js";
+import { runRouteEffect } from "../../../shared/http/run-route-effect.js";
 import type { AuthService } from "../application/auth-service.js";
 import { authenticateRequest } from "./authenticate-request.js";
 
@@ -33,13 +33,7 @@ export const registerAuthRoutes: FastifyPluginAsync<AuthRoutesOptions> = async (
         throw new ValidationError(parsedBody.error.flatten());
       }
 
-      const loginResult = await Effect.runPromise(Effect.either(authService.login(parsedBody.data)));
-
-      if (Either.isLeft(loginResult)) {
-        throw loginResult.left;
-      }
-
-      const result = loginResult.right;
+      const result = await runRouteEffect(authService.login(parsedBody.data));
       const token = server.jwt.sign({ sub: result.user.id });
 
       return reply.send({

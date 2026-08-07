@@ -1,9 +1,9 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { Effect, Either } from "effect";
 
 import type { AuthenticatedUser } from "@kikos/shared";
 
 import { UnauthorizedError } from "../../../shared/errors/app-error.js";
+import { runRouteEffect } from "../../../shared/http/run-route-effect.js";
 import type { AuthService } from "../application/auth-service.js";
 
 type JwtPayload = {
@@ -32,11 +32,5 @@ export const authenticateRequest = async (
     throw new UnauthorizedError();
   }
 
-  const userResult = await Effect.runPromise(Effect.either(authService.getAuthenticatedUser(payload.sub)));
-
-  if (Either.isLeft(userResult)) {
-    throw userResult.left;
-  }
-
-  return userResult.right;
+  return runRouteEffect(authService.getAuthenticatedUser(payload.sub));
 };

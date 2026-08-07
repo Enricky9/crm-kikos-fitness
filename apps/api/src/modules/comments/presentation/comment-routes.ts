@@ -1,5 +1,4 @@
 import type { FastifyPluginCallback } from "fastify";
-import { Effect, Either } from "effect";
 import { z } from "zod";
 
 import { createCommentSchema } from "@kikos/shared";
@@ -7,6 +6,7 @@ import { createCommentSchema } from "@kikos/shared";
 import type { AuthService } from "../../auth/application/auth-service.js";
 import { authenticateRequest } from "../../auth/presentation/authenticate-request.js";
 import { ValidationError } from "../../../shared/errors/app-error.js";
+import { runRouteEffect } from "../../../shared/http/run-route-effect.js";
 import type { CommentService } from "../application/comment-service.js";
 
 type CommentRoutesOptions = {
@@ -22,16 +22,6 @@ const leadParamsSchema = z.object({
 const dealParamsSchema = z.object({
   dealId: z.string().uuid()
 });
-
-const runRouteEffect = async <A>(effect: Effect.Effect<A, unknown>) => {
-  const result = await Effect.runPromise(Effect.either(effect));
-
-  if (Either.isLeft(result)) {
-    throw result.left;
-  }
-
-  return result.right;
-};
 
 export const registerCommentRoutes: FastifyPluginCallback<CommentRoutesOptions> = (
   server,
