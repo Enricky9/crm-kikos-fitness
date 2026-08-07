@@ -1,4 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import {
@@ -14,84 +13,20 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
-import { Controller, useForm } from "react-hook-form";
-import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
-import type { z } from "zod";
+import { Controller } from "react-hook-form";
+import { Link as RouterLink } from "react-router-dom";
 
-import { createDealSchema, dealStatusLabels, type CreateDealDto, type OpenDealStatus } from "@kikos/shared";
+import { dealStatusLabels, type OpenDealStatus } from "@kikos/shared";
 
 import { useAuth } from "../../features/auth/AuthContext";
-import { createDealRequest, listSellersRequest } from "../../features/deals/api/deals-api";
-import { listLeadsRequest } from "../../features/leads/api/leads-api";
-import { HttpError } from "../../shared/api/http";
+import { useCreateDeal } from "../../features/deals/hooks/use-create-deal";
 import { LoadingState } from "../../shared/components/LoadingState";
 
 const initialStatuses = ["NEW", "IN_PROGRESS", "PROPOSAL"] as const satisfies readonly OpenDealStatus[];
 
-type CreateDealFormValues = z.input<typeof createDealSchema>;
-
-const getErrorMessage = (error: unknown, fallback: string) => {
-  if (error instanceof HttpError) {
-    return error.payload.error.message;
-  }
-
-  return fallback;
-};
-
 export const CreateDealPage = () => {
   const { token } = useAuth();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
-  const selectedLeadId = searchParams.get("leadId") ?? "";
-
-  const form = useForm<CreateDealFormValues, unknown, CreateDealDto>({
-    resolver: zodResolver(createDealSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      value: 0,
-      status: "NEW",
-      leadId: selectedLeadId,
-      sellerId: ""
-    }
-  });
-
-  const [leadsQuery, sellersQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ["leads", "deal-form"],
-        queryFn: () => listLeadsRequest(token ?? "", { page: 1, pageSize: 100, sortBy: "name", sortOrder: "asc" }),
-        enabled: Boolean(token)
-      },
-      {
-        queryKey: ["sellers"],
-        queryFn: () => listSellersRequest(token ?? ""),
-        enabled: Boolean(token)
-      }
-    ]
-  });
-
-  const createMutation = useMutation({
-    mutationFn: (input: CreateDealDto) => createDealRequest(token ?? "", input),
-    onSuccess: (response) => {
-      void queryClient.invalidateQueries({ queryKey: ["deals"] });
-      void queryClient.invalidateQueries({ queryKey: ["leads"] });
-      void navigate(`/deals/${response.deal.id}`, { replace: true });
-    }
-  });
-
-  const onSubmit = form.handleSubmit((values) => {
-    createMutation.mutate(values);
-  });
-
-  const isLoadingOptions = leadsQuery.isLoading || sellersQuery.isLoading;
-  const optionsError =
-    leadsQuery.isError || sellersQuery.isError ? "Nao foi possivel carregar leads ou vendedores." : null;
-  const mutationError = createMutation.error
-    ? getErrorMessage(createMutation.error, "Nao foi possivel criar o negocio.")
-    : null;
+  const { form, isLoadingOptions, isPending, leads, mutationError, optionsError, sellers, submit } = useCreateDeal(token);
 
   return (
     <Stack spacing={3} sx={{ maxWidth: 980, mx: "auto", width: "100%" }}>
@@ -111,7 +46,7 @@ export const CreateDealPage = () => {
         component="form"
         elevation={0}
         onSubmit={(event) => {
-          void onSubmit(event);
+          void submit(event);
         }}
         sx={{
           bgcolor: "background.paper",
@@ -212,7 +147,7 @@ export const CreateDealPage = () => {
                 <FormControl fullWidth error={Boolean(fieldState.error)}>
                   <InputLabel id="deal-lead-label">Lead</InputLabel>
                   <Select {...field} label="Lead" labelId="deal-lead-label">
-                    {leadsQuery.data?.data.map((lead) => (
+                    {leads.map((lead) => (
                       <MenuItem key={lead.id} value={lead.id}>
                         {lead.name} {lead.company ? `- ${lead.company}` : ""}
                       </MenuItem>
@@ -234,7 +169,7 @@ export const CreateDealPage = () => {
                 <FormControl fullWidth error={Boolean(fieldState.error)}>
                   <InputLabel id="deal-seller-label">Vendedor</InputLabel>
                   <Select {...field} label="Vendedor" labelId="deal-seller-label">
-                    {sellersQuery.data?.sellers.map((seller) => (
+                    {sellers.map((seller) => (
                       <MenuItem key={seller.id} value={seller.id}>
                         {seller.name}
                       </MenuItem>
@@ -252,12 +187,12 @@ export const CreateDealPage = () => {
 
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-end">
             <Button
-              disabled={createMutation.isPending || isLoadingOptions}
+              disabled={isPending || isLoadingOptions}
               startIcon={<SaveIcon />}
               type="submit"
               variant="contained"
             >
-              {createMutation.isPending ? "Salvando..." : "Salvar negocio"}
+              {isPending ? "Salvando..." : "Salvar negocio"}
             </Button>
           </Stack>
         </Stack>
