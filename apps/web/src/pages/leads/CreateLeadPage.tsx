@@ -1,50 +1,15 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import { Alert, Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Controller, useForm } from "react-hook-form";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
-
-import { createLeadSchema, type CreateLeadDto } from "@kikos/shared";
+import { Controller } from "react-hook-form";
+import { Link as RouterLink } from "react-router-dom";
 
 import { useAuth } from "../../features/auth/AuthContext";
-import { createLeadRequest } from "../../features/leads/api/leads-api";
-import { HttpError } from "../../shared/api/http";
+import { useCreateLead } from "../../features/leads/hooks/use-create-lead";
 
 export const CreateLeadPage = () => {
   const { token } = useAuth();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const form = useForm<CreateLeadDto>({
-    resolver: zodResolver(createLeadSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      company: "",
-      source: ""
-    }
-  });
-
-  const createLeadMutation = useMutation({
-    mutationFn: (input: CreateLeadDto) => createLeadRequest(token ?? "", input),
-    onSuccess: (response) => {
-      void queryClient.invalidateQueries({ queryKey: ["leads"] });
-      void navigate(`/leads/${response.lead.id}`, { replace: true });
-    }
-  });
-
-  const onSubmit = form.handleSubmit((values) => {
-    createLeadMutation.mutate(values);
-  });
-
-  const errorMessage =
-    createLeadMutation.error instanceof HttpError
-      ? createLeadMutation.error.payload.error.message
-      : createLeadMutation.isError
-        ? "Nao foi possivel criar o lead."
-        : null;
+  const { errorMessage, form, isPending, submit } = useCreateLead(token);
 
   return (
     <Stack spacing={3} sx={{ maxWidth: 920, mx: "auto", width: "100%" }}>
@@ -63,7 +28,7 @@ export const CreateLeadPage = () => {
       <Paper
         component="form"
         onSubmit={(event) => {
-          void onSubmit(event);
+          void submit(event);
         }}
         elevation={0}
         sx={{
@@ -160,12 +125,12 @@ export const CreateLeadPage = () => {
 
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-end">
             <Button
-              disabled={createLeadMutation.isPending}
+              disabled={isPending}
               startIcon={<SaveIcon />}
               type="submit"
               variant="contained"
             >
-              {createLeadMutation.isPending ? "Salvando..." : "Salvar lead"}
+              {isPending ? "Salvando..." : "Salvar lead"}
             </Button>
           </Stack>
         </Stack>
