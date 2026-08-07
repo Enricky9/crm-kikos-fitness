@@ -22,50 +22,20 @@ import {
   Tooltip,
   Typography
 } from "@mui/material";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import { useAuth } from "../../features/auth/AuthContext";
-import { listLeadsRequest } from "../../features/leads/api/leads-api";
+import { getLeadInitials, leadPageSizeOptions, useLeadList } from "../../features/leads/hooks/use-lead-list";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { formatDateTime } from "../../shared/utils/format";
 
-const pageSizeOptions = [10, 20, 50];
-
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-
 export const LeadListPage = () => {
   const { token } = useAuth();
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
-
-  const leadsQuery = useQuery({
-    queryKey: ["leads", { page, pageSize, search }],
-    queryFn: () =>
-      listLeadsRequest(token ?? "", {
-        page: page + 1,
-        pageSize,
-        search: search || undefined,
-        sortBy: "createdAt",
-        sortOrder: "desc"
-      }),
-    enabled: Boolean(token),
-    placeholderData: keepPreviousData
-  });
+  const { leadsQuery, page, pageSize, searchInput, setPage, setPageSize, setSearchInput, submitSearch } = useLeadList(token);
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setPage(0);
-    setSearch(searchInput.trim());
+    submitSearch();
   };
 
   return (
@@ -196,7 +166,7 @@ export const LeadListPage = () => {
                         width: 36
                       }}
                     >
-                      {getInitials(lead.name)}
+                      {getLeadInitials(lead.name)}
                     </Box>
                     <Box sx={{ minWidth: 0 }}>
                       <Typography fontWeight={700} noWrap>
@@ -274,7 +244,7 @@ export const LeadListPage = () => {
           }}
           page={page}
           rowsPerPage={pageSize}
-          rowsPerPageOptions={pageSizeOptions}
+          rowsPerPageOptions={leadPageSizeOptions}
         />
       </TableContainer>
     </Stack>
