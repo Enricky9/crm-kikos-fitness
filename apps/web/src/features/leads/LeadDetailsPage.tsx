@@ -28,7 +28,7 @@ import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { getDealStatusChipSx } from "../deals/components/deal-status-chip";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
-import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "./leads-api";
+import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "./api/leads-api";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof HttpError) {

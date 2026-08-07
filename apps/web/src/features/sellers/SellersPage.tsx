@@ -11,7 +11,7 @@ import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { formatCurrency } from "../../shared/utils/format";
-import { listDealsRequest, listSellersRequest } from "../deals/deals-api";
+import { listDealsRequest, listSellersRequest } from "../deals/api/deals-api";
 
 export type SellerPerformanceRow = {
   readonly conversionRate: number;

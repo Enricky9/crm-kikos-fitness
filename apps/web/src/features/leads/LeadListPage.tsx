@@ -29,7 +29,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { formatDateTime } from "../../shared/utils/format";
-import { listLeadsRequest } from "./leads-api";
+import { listLeadsRequest } from "./api/leads-api";
 
 const pageSizeOptions = [10, 20, 50];
 

@@ -45,7 +45,7 @@ import {
   loseDealRequest,
   reopenDealRequest,
   winDealRequest
-} from "./deals-api";
+} from "./api/deals-api";
 
 const statusOptions: Record<DealStatus, readonly DealStatus[]> = {
   NEW: ["NEW", "IN_PROGRESS", "LOST"],

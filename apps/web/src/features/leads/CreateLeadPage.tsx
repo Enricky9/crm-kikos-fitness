@@ -10,7 +10,7 @@ import { createLeadSchema, type CreateLeadDto } from "@kikos/shared";
 
 import { HttpError } from "../../shared/api/http";
 import { useAuth } from "../auth/AuthContext";
-import { createLeadRequest } from "./leads-api";
+import { createLeadRequest } from "./api/leads-api";
 
 export const CreateLeadPage = () => {
   const { token } = useAuth();

@@ -2,7 +2,7 @@ import type { AuthenticatedUser } from "@kikos/shared";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { HttpError } from "../../shared/api/http";
-import { loginRequest, meRequest, type LoginInput } from "./auth-api";
+import { loginRequest, meRequest, type LoginInput } from "./api/auth-api";
 import { authStorage } from "./auth-storage";
 
 type AuthStatus = "loading" | "authenticated" | "anonymous";

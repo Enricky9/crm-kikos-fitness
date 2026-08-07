@@ -24,8 +24,8 @@ import { createDealSchema, dealStatusLabels, type CreateDealDto, type OpenDealSt
 import { HttpError } from "../../shared/api/http";
 import { useAuth } from "../auth/AuthContext";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { listLeadsRequest } from "../leads/leads-api";
-import { createDealRequest, listSellersRequest } from "./deals-api";
+import { listLeadsRequest } from "../leads/api/leads-api";
+import { createDealRequest, listSellersRequest } from "./api/deals-api";
 
 const initialStatuses = ["NEW", "IN_PROGRESS", "PROPOSAL"] as const satisfies readonly OpenDealStatus[];
 

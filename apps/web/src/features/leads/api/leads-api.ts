@@ -8,7 +8,7 @@ import type {
   PaginatedLeadsDto
 } from "@kikos/shared";
 
-import { apiRequest } from "../../shared/api/http";
+import { apiRequest } from "../../../shared/api/http";
 
 const toQueryString = (query: Partial<LeadListQuery>) => {
   const params = new URLSearchParams();

@@ -36,7 +36,7 @@ import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { getDealStatusChipSx } from "./components/deal-status-chip";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
-import { changeDealStatusRequest, listDealsRequest, loseDealRequest, winDealRequest } from "./deals-api";
+import { changeDealStatusRequest, listDealsRequest, loseDealRequest, winDealRequest } from "./api/deals-api";
 
 const boardStatuses = ["NEW", "IN_PROGRESS", "PROPOSAL", "WON", "LOST"] as const satisfies readonly DealStatus[];
 

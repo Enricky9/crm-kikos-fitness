@@ -12,8 +12,8 @@ import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { getDealStatusChipSx } from "../deals/components/deal-status-chip";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
-import { listDealsRequest, listSellersRequest } from "../deals/deals-api";
-import { listLeadsRequest } from "../leads/leads-api";
+import { listDealsRequest, listSellersRequest } from "../deals/api/deals-api";
+import { listLeadsRequest } from "../leads/api/leads-api";
 
 const dashboardStatuses = ["NEW", "IN_PROGRESS", "PROPOSAL", "WON", "LOST"] as const satisfies readonly DealStatus[];
 
