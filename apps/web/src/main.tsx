@@ -1,34 +1,10 @@
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
-import { AuthProvider } from "./features/auth/AuthContext";
-import { LoginPage } from "./features/auth/LoginPage";
-import { RequireAuth } from "./features/auth/RequireAuth";
-import { AppShell } from "./ui/AppShell";
-import { theme } from "./ui/theme";
-
-const queryClient = new QueryClient();
+import { App } from "./app/App";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route element={<RequireAuth />}>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/*" element={<AppShell />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <App />
   </React.StrictMode>
 );
