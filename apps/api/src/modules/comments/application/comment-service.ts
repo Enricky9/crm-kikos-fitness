@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import type { AuthenticatedUser, CreateCommentDto } from "@kikos/shared";
 
 import { DealNotFoundError, LeadNotFoundError } from "../../../shared/errors/app-error.js";
-import type { CommentRepository } from "./comment-repository.js";
+import type { CommentRepository } from "./ports/comment-repository.js";
 
 export const createCommentService = (commentRepository: CommentRepository) => ({
   listByLead: (leadId: string) =>

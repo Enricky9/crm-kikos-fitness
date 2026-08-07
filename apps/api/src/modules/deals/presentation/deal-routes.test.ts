@@ -5,8 +5,8 @@ import type { AuthenticatedUser, DealDto, DealStatus } from "@kikos/shared";
 
 import { buildServer } from "../../../app/server.js";
 import { LeadNotFoundError, SellerNotFoundError } from "../../../shared/errors/app-error.js";
-import type { UserRecord, UserRepository } from "../../users/application/user-repository.js";
-import type { DealListResult, DealRepository } from "../application/deal-repository.js";
+import type { UserRecord, UserRepository } from "../../users/application/ports/user-repository.js";
+import type { DealListResult, DealRepository } from "../application/ports/deal-repository.js";
 
 const adminUser: UserRecord = {
   id: "0f890ef6-af84-43e2-a536-146776d22b62",

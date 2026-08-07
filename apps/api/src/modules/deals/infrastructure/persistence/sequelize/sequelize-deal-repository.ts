@@ -6,8 +6,8 @@ import type {
   DealDetailsDto,
   DealDto,
   DealListQuery,
-  DealStatusHistoryDto,
   DealStatus,
+  DealStatusHistoryDto
 } from "@kikos/shared";
 
 import {
@@ -16,11 +16,11 @@ import {
   DealStatusHistoryModel,
   LeadModel,
   UserModel
-} from "../../../shared/database/models/index.js";
-import { sequelize } from "../../../shared/database/sequelize.js";
-import { LeadNotFoundError, SellerNotFoundError } from "../../../shared/errors/app-error.js";
-import { isClosedDealStatus } from "../domain/deal-transitions.js";
-import type { DealRepository } from "../application/deal-repository.js";
+} from "../../../../../shared/database/models/index.js";
+import { sequelize } from "../../../../../shared/database/sequelize.js";
+import { LeadNotFoundError, SellerNotFoundError } from "../../../../../shared/errors/app-error.js";
+import { isClosedDealStatus } from "../../../domain/deal-transitions.js";
+import type { DealRepository } from "../../../application/ports/deal-repository.js";
 
 const includeRelations = [
   { model: LeadModel, as: "lead", attributes: ["id", "name", "company"], required: false },

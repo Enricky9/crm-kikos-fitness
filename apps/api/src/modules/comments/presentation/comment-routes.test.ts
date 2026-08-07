@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import type { CommentDto } from "@kikos/shared";
 
 import { buildServer } from "../../../app/server.js";
-import type { UserRepository, UserRecord } from "../../users/application/user-repository.js";
-import type { CommentRepository } from "../application/comment-repository.js";
+import type { UserRepository, UserRecord } from "../../users/application/ports/user-repository.js";
+import type { CommentRepository } from "../application/ports/comment-repository.js";
 
 const demoUser: UserRecord = {
   id: "0f890ef6-af84-43e2-a536-146776d22b62",

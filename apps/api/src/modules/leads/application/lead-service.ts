@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import type { CreateLeadDto, LeadListQuery, UpdateLeadDto } from "@kikos/shared";
 
 import { LeadNotFoundError } from "../../../shared/errors/app-error.js";
-import type { LeadRepository } from "./lead-repository.js";
+import type { LeadRepository } from "./ports/lead-repository.js";
 
 export const createLeadService = (leadRepository: LeadRepository) => ({
   list: (query: LeadListQuery) =>

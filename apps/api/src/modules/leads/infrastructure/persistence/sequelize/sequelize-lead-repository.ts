@@ -2,8 +2,8 @@ import { Op, Sequelize } from "sequelize";
 
 import type { LeadDto } from "@kikos/shared";
 
-import { DealModel, LeadModel } from "../../../shared/database/models/index.js";
-import type { LeadRepository } from "../application/lead-repository.js";
+import { DealModel, LeadModel } from "../../../../../shared/database/models/index.js";
+import type { LeadRepository } from "../../../application/ports/lead-repository.js";
 
 const toLeadDto = (lead: LeadModel, dealsCount = 0): LeadDto => ({
   id: lead.id,

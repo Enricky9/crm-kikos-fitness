@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import type { LeadDto } from "@kikos/shared";
 
 import { buildServer } from "../../../app/server.js";
-import type { UserRecord, UserRepository } from "../../users/application/user-repository.js";
-import type { LeadRepository } from "../application/lead-repository.js";
+import type { UserRecord, UserRepository } from "../../users/application/ports/user-repository.js";
+import type { LeadRepository } from "../application/ports/lead-repository.js";
 
 const demoUser: UserRecord = {
   id: "0f890ef6-af84-43e2-a536-146776d22b62",

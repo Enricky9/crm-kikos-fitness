@@ -11,7 +11,7 @@ import type {
 
 import { DealNotFoundError, InvalidDealTransitionError } from "../../../shared/errors/app-error.js";
 import { canTransitionDeal, isClosedDealStatus } from "../domain/deal-transitions.js";
-import type { DealRepository } from "./deal-repository.js";
+import type { DealRepository } from "./ports/deal-repository.js";
 
 export const createDealService = (dealRepository: DealRepository) => ({
   list: (query: DealListQuery, user: AuthenticatedUser) =>

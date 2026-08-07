@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { AuthenticatedUser, DealDetailsDto, DealDto } from "@kikos/shared";
 
 import { DealNotFoundError, InvalidDealTransitionError } from "../../../shared/errors/app-error.js";
-import type { DealListResult, DealRepository } from "./deal-repository.js";
+import type { DealListResult, DealRepository } from "./ports/deal-repository.js";
 import { createDealService } from "./deal-service.js";
 
 const user: AuthenticatedUser = {

@@ -1,5 +1,5 @@
-import type { PublicUser, UserRecord, UserRepository } from "../application/user-repository.js";
-import { UserModel } from "../../../shared/database/models/index.js";
+import type { PublicUser, UserRecord, UserRepository } from "../../../application/ports/user-repository.js";
+import { UserModel } from "../../../../../shared/database/models/index.js";
 
 const toUserRecord = (user: UserModel): UserRecord => ({
   id: user.id,

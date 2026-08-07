@@ -1,7 +1,7 @@
 import type { AuthenticatedUser, CommentDto } from "@kikos/shared";
 
-import { CommentModel, DealModel, LeadModel, UserModel } from "../../../shared/database/models/index.js";
-import type { CommentRepository } from "../application/comment-repository.js";
+import { CommentModel, DealModel, LeadModel, UserModel } from "../../../../../shared/database/models/index.js";
+import type { CommentRepository } from "../../../application/ports/comment-repository.js";
 
 const includeAuthor = [{ model: UserModel, as: "author", attributes: ["id", "name", "email"], required: false }];
 

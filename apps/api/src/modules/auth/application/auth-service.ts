@@ -4,7 +4,7 @@ import { Effect } from "effect";
 import type { AuthenticatedUser } from "@kikos/shared";
 
 import { InvalidCredentialsError, UnauthorizedError } from "../../../shared/errors/app-error.js";
-import type { UserRepository } from "../../users/application/user-repository.js";
+import type { UserRepository } from "../../users/application/ports/user-repository.js";
 
 export type LoginInput = {
   readonly email: string;

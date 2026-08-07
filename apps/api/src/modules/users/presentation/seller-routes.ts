@@ -2,7 +2,7 @@ import type { FastifyPluginCallback } from "fastify";
 
 import type { AuthService } from "../../auth/application/auth-service.js";
 import { authenticateRequest } from "../../auth/presentation/authenticate-request.js";
-import type { UserRepository } from "../application/user-repository.js";
+import type { UserRepository } from "../application/ports/user-repository.js";
 
 type SellerRoutesOptions = {
   readonly authService: AuthService;
