@@ -3,10 +3,9 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { Alert, Box, Chip, LinearProgress, Paper, Stack, Typography } from "@mui/material";
-import { useQueries } from "@tanstack/react-query";
 
 import { useAuth } from "../../features/auth/AuthContext";
-import { listDealsRequest, listSellersRequest } from "../../features/deals/api/deals-api";
+import { useSellersData } from "../../features/sellers/hooks/use-sellers-data";
 import { buildSellerPerformanceRows, getSellerTotals } from "../../features/sellers/lib/seller-performance";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
@@ -14,26 +13,7 @@ import { formatCurrency } from "../../shared/utils/format";
 
 export const SellersPage = () => {
   const { token } = useAuth();
-
-  const [sellersQuery, dealsQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ["sellers"],
-        queryFn: () => listSellersRequest(token ?? ""),
-        enabled: Boolean(token)
-      },
-      {
-        queryKey: ["sellers", "deals"],
-        queryFn: () => listDealsRequest(token ?? "", { page: 1, pageSize: 100 }),
-        enabled: Boolean(token)
-      }
-    ]
-  });
-
-  const isLoading = sellersQuery.isLoading || dealsQuery.isLoading;
-  const isError = sellersQuery.isError || dealsQuery.isError;
-  const sellers = sellersQuery.data?.sellers ?? [];
-  const deals = dealsQuery.data?.data ?? [];
+  const { deals, isError, isLoading, sellers } = useSellersData(token);
   const rows = buildSellerPerformanceRows(sellers, deals);
   const totals = getSellerTotals(rows);
 
