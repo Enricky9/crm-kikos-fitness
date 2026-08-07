@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import type { DealDto, SellerDto } from "@kikos/shared";
 
-import { buildSellerRows, getOpenPipelineValue, getWonValue, sortByUpdatedAt } from "./DashboardPage";
+import {
+  buildSellerRows,
+  getOpenPipelineValue,
+  getWonValue,
+  sortByUpdatedAt
+} from "../../features/dashboard/lib/dashboard-metrics";
 
 const sellerA: SellerDto = {
   email: "ana@example.com",
