@@ -1,63 +1,17 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import LoginIcon from "@mui/icons-material/Login";
 import { Alert, Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { Controller } from "react-hook-form";
+import { Navigate } from "react-router-dom";
 
-import { useAuth } from "../../features/auth/AuthContext";
-import { HttpError } from "../../shared/api/http";
-
-const loginFormSchema = z.object({
-  email: z.string().trim().email("Informe um e-mail valido"),
-  password: z.string().min(1, "Informe a senha")
-});
-
-type LoginFormValues = z.infer<typeof loginFormSchema>;
-
-type LocationState = {
-  readonly from?: {
-    readonly pathname?: string;
-  };
-};
+import { useLoginForm } from "../../features/auth/hooks/use-login-form";
 
 export const LoginPage = () => {
-  const auth = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginFormSchema),
-    defaultValues: {
-      email: "",
-      password: ""
-    }
-  });
+  const { errorMessage, form, redirectTo, status, submit } = useLoginForm();
 
-  const locationState = location.state as LocationState | null;
-  const redirectTo = locationState?.from?.pathname ?? "/dashboard";
-
-  if (auth.status === "authenticated") {
+  if (status === "authenticated") {
     return <Navigate to={redirectTo} replace />;
   }
-
-  const onSubmit = form.handleSubmit(async (values) => {
-    setErrorMessage(null);
-
-    try {
-      await auth.login(values);
-      void navigate(redirectTo, { replace: true });
-    } catch (error) {
-      if (error instanceof HttpError) {
-        setErrorMessage(error.payload.error.message);
-        return;
-      }
-
-      setErrorMessage("Nao foi possivel entrar agora");
-    }
-  });
 
   return (
     <Box
@@ -83,7 +37,7 @@ export const LoginPage = () => {
       <Paper
         component="form"
         onSubmit={(event) => {
-          void onSubmit(event);
+          void submit(event);
         }}
         elevation={0}
         sx={{
