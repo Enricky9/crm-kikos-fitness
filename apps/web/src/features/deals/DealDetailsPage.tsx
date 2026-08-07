@@ -32,12 +32,12 @@ import { Link as RouterLink, useParams } from "react-router-dom";
 
 import { createCommentSchema, dealStatusLabels, type CreateCommentDto, type DealDto, type DealStatus } from "@kikos/shared";
 
-import { HttpError } from "../../api/http";
+import { HttpError } from "../../shared/api/http";
 import { useAuth } from "../../auth/AuthContext";
-import { EmptyState } from "../../ui/EmptyState";
-import { LoadingState } from "../../ui/LoadingState";
+import { EmptyState } from "../../shared/components/EmptyState";
+import { LoadingState } from "../../shared/components/LoadingState";
 import { getDealStatusChipSx } from "../../ui/status-chip";
-import { formatCurrency, formatDateTime } from "../../utils/format";
+import { formatCurrency, formatDateTime } from "../../shared/utils/format";
 import {
   changeDealStatusRequest,
   createDealCommentRequest,

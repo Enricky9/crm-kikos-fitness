@@ -9,7 +9,7 @@ import type {
   SellerDto
 } from "@kikos/shared";
 
-import { apiRequest } from "../../api/http";
+import { apiRequest } from "../../shared/api/http";
 
 type PaginatedDealsDto = {
   readonly data: readonly DealDto[];

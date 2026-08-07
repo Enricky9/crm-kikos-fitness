@@ -1,6 +1,6 @@
 import type { AuthenticatedUser } from "@kikos/shared";
 
-import { apiRequest } from "../api/http";
+import { apiRequest } from "../shared/api/http";
 
 export type LoginInput = {
   readonly email: string;

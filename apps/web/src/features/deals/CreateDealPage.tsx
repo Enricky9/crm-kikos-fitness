@@ -21,9 +21,9 @@ import type { z } from "zod";
 
 import { createDealSchema, dealStatusLabels, type CreateDealDto, type OpenDealStatus } from "@kikos/shared";
 
-import { HttpError } from "../../api/http";
+import { HttpError } from "../../shared/api/http";
 import { useAuth } from "../../auth/AuthContext";
-import { LoadingState } from "../../ui/LoadingState";
+import { LoadingState } from "../../shared/components/LoadingState";
 import { listLeadsRequest } from "../leads/leads-api";
 import { createDealRequest, listSellersRequest } from "./deals-api";
 

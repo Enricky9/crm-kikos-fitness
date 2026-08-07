@@ -7,7 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
-import { HttpError } from "../../api/http";
+import { HttpError } from "../../shared/api/http";
 import { useAuth } from "../../auth/AuthContext";
 
 const loginFormSchema = z.object({

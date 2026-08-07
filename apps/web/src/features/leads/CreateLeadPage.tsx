@@ -8,7 +8,7 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 import { createLeadSchema, type CreateLeadDto } from "@kikos/shared";
 
-import { HttpError } from "../../api/http";
+import { HttpError } from "../../shared/api/http";
 import { useAuth } from "../../auth/AuthContext";
 import { createLeadRequest } from "./leads-api";
 
