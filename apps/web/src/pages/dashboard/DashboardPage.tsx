@@ -3,13 +3,12 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import PersonPinIcon from "@mui/icons-material/PersonPin";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { Alert, Box, Chip, LinearProgress, Paper, Stack, Typography } from "@mui/material";
-import { useQueries } from "@tanstack/react-query";
 
 import { dealStatusLabels } from "@kikos/shared";
 
 import { useAuth } from "../../features/auth/AuthContext";
-import { listDealsRequest, listSellersRequest } from "../../features/deals/api/deals-api";
 import { getDealStatusChipSx } from "../../features/deals/components/deal-status-chip";
+import { useDashboardData } from "../../features/dashboard/hooks/use-dashboard-data";
 import {
   buildSellerRows,
   dashboardStatuses,
@@ -17,45 +16,13 @@ import {
   getWonValue,
   sortByUpdatedAt
 } from "../../features/dashboard/lib/dashboard-metrics";
-import { listLeadsRequest } from "../../features/leads/api/leads-api";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
 
 export const DashboardPage = () => {
   const { token } = useAuth();
-
-  const [leadsQuery, dealsQuery, sellersQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ["dashboard", "leads"],
-        queryFn: () =>
-          listLeadsRequest(token ?? "", {
-            page: 1,
-            pageSize: 100,
-            sortBy: "createdAt",
-            sortOrder: "desc"
-          }),
-        enabled: Boolean(token)
-      },
-      {
-        queryKey: ["dashboard", "deals"],
-        queryFn: () => listDealsRequest(token ?? "", { page: 1, pageSize: 100 }),
-        enabled: Boolean(token)
-      },
-      {
-        queryKey: ["dashboard", "sellers"],
-        queryFn: () => listSellersRequest(token ?? ""),
-        enabled: Boolean(token)
-      }
-    ]
-  });
-
-  const isLoading = leadsQuery.isLoading || dealsQuery.isLoading || sellersQuery.isLoading;
-  const isError = leadsQuery.isError || dealsQuery.isError || sellersQuery.isError;
-  const leads = leadsQuery.data?.data ?? [];
-  const deals = dealsQuery.data?.data ?? [];
-  const sellers = sellersQuery.data?.sellers ?? [];
+  const { deals, dealsTotal, isError, isLoading, leads, leadsTotal, sellers } = useDashboardData(token);
   const openDeals = deals.filter((deal) => deal.status !== "WON" && deal.status !== "LOST");
   const wonDeals = deals.filter((deal) => deal.status === "WON");
   const lostDeals = deals.filter((deal) => deal.status === "LOST");
@@ -75,7 +42,7 @@ export const DashboardPage = () => {
           <Typography color="text.secondary">Visao consolidada do funil comercial e atividade recente.</Typography>
         </Box>
         <Chip
-          label={`${dealsQuery.data?.pagination.total ?? 0} negocios monitorados`}
+          label={`${dealsTotal} negocios monitorados`}
           sx={{
             bgcolor: "rgba(255, 77, 45, 0.14)",
             borderColor: "rgba(255, 77, 45, 0.38)",
@@ -98,7 +65,7 @@ export const DashboardPage = () => {
               gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" }
             }}
           >
-            <MetricCard icon={<GroupsIcon />} label="Leads" value={leadsQuery.data?.pagination.total ?? leads.length} />
+            <MetricCard icon={<GroupsIcon />} label="Leads" value={leadsTotal || leads.length} />
             <MetricCard icon={<TrendingUpIcon />} label="Negocios abertos" value={openDeals.length} />
             <MetricCard icon={<AttachMoneyIcon />} label="Pipeline aberto" value={formatCurrency(openPipelineValue)} />
             <MetricCard icon={<PersonPinIcon />} label="Vendedores" value={sellers.length} />
