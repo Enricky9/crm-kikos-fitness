@@ -1,4 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ReplayIcon from "@mui/icons-material/Replay";
@@ -20,92 +19,43 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { Link as RouterLink, useParams } from "react-router-dom";
 
-import { createCommentSchema, type CreateCommentDto, type DealDto, type DealStatus } from "@kikos/shared";
+import type { DealStatus } from "@kikos/shared";
 
 import { useAuth } from "../../features/auth/AuthContext";
 import { DealDetailsSummary } from "../../features/deals/components/deal-details-summary";
 import { DealStatusHistory } from "../../features/deals/components/deal-status-history";
-import { HttpError } from "../../shared/api/http";
+import { useDealDetails } from "../../features/deals/hooks/use-deal-details";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { formatDateTime } from "../../shared/utils/format";
-import {
-  changeDealStatusRequest,
-  createDealCommentRequest,
-  getDealRequest,
-  loseDealRequest,
-  reopenDealRequest,
-  winDealRequest
-} from "../../features/deals/api/deals-api";
-
-const getErrorMessage = (error: unknown, fallback: string) => {
-  if (error instanceof HttpError) {
-    return error.payload.error.message;
-  }
-
-  return fallback;
-};
 
 export const DealDetailsPage = () => {
   const { dealId } = useParams<{ dealId: string }>();
   const { token } = useAuth();
-  const queryClient = useQueryClient();
   const [lostDialogOpen, setLostDialogOpen] = useState(false);
   const [lostReason, setLostReason] = useState("");
-
-  const commentForm = useForm<CreateCommentDto>({
-    resolver: zodResolver(createCommentSchema),
-    defaultValues: {
-      content: ""
-    }
+  const {
+    addComment,
+    commentForm,
+    deal,
+    errorMessage,
+    isCommentPending,
+    isDealError,
+    isDealLoading,
+    isReopenPending,
+    isStatusPending,
+    reopenDeal,
+    setDealStatus
+  } = useDealDetails({
+    dealId,
+    token
   });
 
-  const dealQuery = useQuery({
-    queryKey: ["deal", dealId],
-    queryFn: () => getDealRequest(token ?? "", dealId ?? ""),
-    enabled: Boolean(token && dealId)
-  });
-
-  const invalidateDeal = () => {
-    void queryClient.invalidateQueries({ queryKey: ["deal", dealId] });
-    void queryClient.invalidateQueries({ queryKey: ["deals"] });
-    void queryClient.invalidateQueries({ queryKey: ["leads"] });
-  };
-
-  const statusMutation = useMutation({
-    mutationFn: ({ deal, status, reason }: { readonly deal: DealDto; readonly status: DealStatus; readonly reason?: string }) => {
-      if (status === "WON") {
-        return winDealRequest(token ?? "", deal.id);
-      }
-
-      if (status === "LOST") {
-        return loseDealRequest(token ?? "", deal.id, reason);
-      }
-
-      return changeDealStatusRequest(token ?? "", deal.id, { status });
-    },
-    onSuccess: invalidateDeal
-  });
-
-  const reopenMutation = useMutation({
-    mutationFn: (deal: DealDto) => reopenDealRequest(token ?? "", deal.id),
-    onSuccess: invalidateDeal
-  });
-
-  const commentMutation = useMutation({
-    mutationFn: (input: CreateCommentDto) => createDealCommentRequest(token ?? "", dealId ?? "", input),
-    onSuccess: () => {
-      commentForm.reset({ content: "" });
-      void queryClient.invalidateQueries({ queryKey: ["deal", dealId] });
-    }
-  });
-
-  if (dealQuery.isLoading) {
+  if (isDealLoading) {
     return (
       <Stack spacing={2}>
         <LoadingState blocks={[{ height: 48, width: 280 }, { height: 220 }, { height: 180 }]} />
@@ -113,18 +63,11 @@ export const DealDetailsPage = () => {
     );
   }
 
-  if (dealQuery.isError || !dealQuery.data) {
+  if (isDealError || !deal) {
     return <Alert severity="error">Nao foi possivel carregar o negocio.</Alert>;
   }
 
-  const deal = dealQuery.data.deal;
   const isClosed = deal.status === "WON" || deal.status === "LOST";
-  const mutationError = statusMutation.error ?? reopenMutation.error ?? commentMutation.error;
-  const errorMessage = mutationError ? getErrorMessage(mutationError, "Nao foi possivel concluir a operacao.") : null;
-
-  const submitComment = commentForm.handleSubmit((values) => {
-    commentMutation.mutate(values);
-  });
 
   const handleStatusChange = (status: DealStatus) => {
     if (status === deal.status) {
@@ -136,19 +79,17 @@ export const DealDetailsPage = () => {
       return;
     }
 
-    statusMutation.mutate({ deal, status });
+    setDealStatus(deal, status);
   };
 
   const confirmLost = () => {
-    statusMutation.mutate(
-      { deal, status: "LOST", reason: lostReason.trim() || undefined },
-      {
-        onSuccess: () => {
-          setLostReason("");
-          setLostDialogOpen(false);
-        }
+    setDealStatus(deal, "LOST", {
+      reason: lostReason.trim() || undefined,
+      onSuccess: () => {
+        setLostReason("");
+        setLostDialogOpen(false);
       }
-    );
+    });
   };
 
   return (
@@ -167,9 +108,9 @@ export const DealDetailsPage = () => {
         </Stack>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           <Button
-            disabled={isClosed || statusMutation.isPending}
+            disabled={isClosed || isStatusPending}
             onClick={() => {
-              statusMutation.mutate({ deal, status: "WON" });
+              setDealStatus(deal, "WON");
             }}
             startIcon={<CheckCircleIcon />}
             variant="contained"
@@ -178,7 +119,7 @@ export const DealDetailsPage = () => {
           </Button>
           <Button
             color="inherit"
-            disabled={isClosed || statusMutation.isPending}
+            disabled={isClosed || isStatusPending}
             onClick={() => {
               setLostDialogOpen(true);
             }}
@@ -187,9 +128,9 @@ export const DealDetailsPage = () => {
             Marcar perdido
           </Button>
           <Button
-            disabled={!isClosed || reopenMutation.isPending}
+            disabled={!isClosed || isReopenPending}
             onClick={() => {
-              reopenMutation.mutate(deal);
+              reopenDeal(deal);
             }}
             startIcon={<ReplayIcon />}
             variant="outlined"
@@ -213,7 +154,7 @@ export const DealDetailsPage = () => {
           <DealDetailsSummary
             deal={deal}
             isClosed={isClosed}
-            isStatusPending={statusMutation.isPending}
+            isStatusPending={isStatusPending}
             onStatusChange={handleStatusChange}
           />
 
@@ -235,7 +176,7 @@ export const DealDetailsPage = () => {
                 component="form"
                 elevation={0}
                 onSubmit={(event) => {
-                  void submitComment(event);
+                  void addComment(event);
                 }}
                 sx={{ bgcolor: "#111115", border: 1, borderColor: "divider", p: 2 }}
               >
@@ -257,12 +198,12 @@ export const DealDetailsPage = () => {
                   />
                   <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-end">
                     <Button
-                      disabled={commentMutation.isPending}
-                      startIcon={commentMutation.isPending ? <SaveIcon /> : <SendIcon />}
+                      disabled={isCommentPending}
+                      startIcon={isCommentPending ? <SaveIcon /> : <SendIcon />}
                       type="submit"
                       variant="contained"
                     >
-                      {commentMutation.isPending ? "Salvando..." : "Adicionar comentario"}
+                      {isCommentPending ? "Salvando..." : "Adicionar comentario"}
                     </Button>
                   </Stack>
                 </Stack>
@@ -333,7 +274,7 @@ export const DealDetailsPage = () => {
           >
             Cancelar
           </Button>
-          <Button disabled={statusMutation.isPending} onClick={confirmLost} variant="contained">
+          <Button disabled={isStatusPending} onClick={confirmLost} variant="contained">
             Confirmar perda
           </Button>
         </DialogActions>
