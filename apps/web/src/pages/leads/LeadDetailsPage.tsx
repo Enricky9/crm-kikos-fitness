@@ -7,7 +7,6 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
   List,
   ListItem,
   ListItemText,
@@ -20,15 +19,16 @@ import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/rea
 import { Controller, useForm } from "react-hook-form";
 import { Link as RouterLink, useParams } from "react-router-dom";
 
-import { createCommentSchema, dealStatusLabels, type CreateCommentDto } from "@kikos/shared";
+import { createCommentSchema, type CreateCommentDto } from "@kikos/shared";
 
 import { useAuth } from "../../features/auth/AuthContext";
-import { getDealStatusChipSx } from "../../features/deals/components/deal-status-chip";
+import { LeadDealsPanel } from "../../features/leads/components/lead-deals-panel";
+import { LeadDetailsSummary } from "../../features/leads/components/lead-details-summary";
 import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "../../features/leads/api/leads-api";
 import { HttpError } from "../../shared/api/http";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { formatCurrency, formatDateTime } from "../../shared/utils/format";
+import { formatDateTime } from "../../shared/utils/format";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof HttpError) {
@@ -126,34 +126,7 @@ export const LeadDetailsPage = () => {
         }}
       >
         <Stack spacing={2}>
-          <Paper
-            elevation={0}
-            sx={{
-              bgcolor: "background.paper",
-              border: 1,
-              borderColor: "divider",
-              boxShadow: "0 18px 44px rgba(0, 0, 0, 0.22)",
-              p: { xs: 2, md: 3 }
-            }}
-          >
-            <Stack spacing={2}>
-              <Typography component="h2" variant="h6">
-                Dados do lead
-              </Typography>
-              <Box
-                sx={{
-                  display: "grid",
-                  gap: 1.5,
-                  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }
-                }}
-              >
-                <Info label="E-mail" value={lead.email ?? "-"} />
-                <Info label="Telefone" value={lead.phone} />
-                <Info label="Origem" value={lead.source ?? "-"} />
-                <Info label="Cadastro" value={formatDateTime(lead.createdAt)} />
-              </Box>
-            </Stack>
-          </Paper>
+          <LeadDetailsSummary lead={lead} />
 
           <Paper
             elevation={0}
@@ -237,97 +210,8 @@ export const LeadDetailsPage = () => {
           </Paper>
         </Stack>
 
-        <Paper
-          elevation={0}
-          sx={{
-            bgcolor: "background.paper",
-            border: 1,
-            borderColor: "divider",
-            p: { xs: 2, md: 3 },
-            position: { lg: "sticky" },
-            top: { lg: 24 }
-          }}
-        >
-          <Stack spacing={2}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-              <Typography component="h2" variant="h6">
-                Negocios
-              </Typography>
-              <Chip
-                label={dealsQuery.data?.data.length ?? 0}
-                size="small"
-                sx={{
-                  bgcolor: "rgba(255, 77, 45, 0.14)",
-                  borderColor: "rgba(255, 77, 45, 0.38)",
-                  color: "text.primary",
-                  minWidth: 34
-                }}
-                variant="outlined"
-              />
-            </Stack>
-            {dealsQuery.isLoading ? <LoadingState blocks={[{ height: 96 }]} /> : null}
-            {dealsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os negocios.</Alert> : null}
-            {dealsQuery.data?.data.length === 0 ? (
-              <EmptyState
-                description="Crie uma oportunidade a partir deste lead."
-                title="Nenhum negocio relacionado."
-              />
-            ) : null}
-            <Stack spacing={1.5}>
-              {dealsQuery.data?.data.map((deal) => (
-                <Paper
-                  key={deal.id}
-                  elevation={0}
-                  sx={{
-                    bgcolor: "#111115",
-                    border: 1,
-                    borderColor: "divider",
-                    p: 2,
-                    transition: "border-color 160ms ease, box-shadow 160ms ease",
-                    "&:hover": {
-                      borderColor: "primary.main",
-                      boxShadow: "0 18px 42px rgba(255, 77, 45, 0.14)"
-                    }
-                  }}
-                >
-                  <Stack spacing={1.25}>
-                    <Box>
-                      <Typography fontWeight={700}>{deal.title}</Typography>
-                      <Typography color="text.secondary">{formatCurrency(deal.value)}</Typography>
-                    </Box>
-                    <Chip
-                      label={dealStatusLabels[deal.status]}
-                      size="small"
-                      sx={getDealStatusChipSx(deal.status)}
-                      variant="outlined"
-                    />
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
-          </Stack>
-        </Paper>
+        <LeadDealsPanel deals={dealsQuery.data?.data ?? []} isError={dealsQuery.isError} isLoading={dealsQuery.isLoading} />
       </Box>
     </Stack>
   );
 };
-
-const Info = ({ label, value }: { readonly label: string; readonly value: string }) => (
-  <Box
-    sx={{
-      bgcolor: "#111115",
-      border: 1,
-      borderColor: "divider",
-      borderRadius: 1,
-      minWidth: 0,
-      p: 1.5
-    }}
-  >
-    <Typography color="text.secondary" variant="body2">
-      {label}
-    </Typography>
-    <Typography fontWeight={700} noWrap>
-      {value}
-    </Typography>
-  </Box>
-);
