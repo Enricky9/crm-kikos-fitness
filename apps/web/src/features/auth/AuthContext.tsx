@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { HttpError } from "../../shared/api/http";
 import { loginRequest, meRequest, type LoginInput } from "./api/auth-api";
-import { authStorage } from "./auth-storage";
+import { authStorage } from "./lib/auth-storage";
 
 type AuthStatus = "loading" | "authenticated" | "anonymous";
 
