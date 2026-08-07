@@ -7,7 +7,7 @@ import { useQueries } from "@tanstack/react-query";
 
 import { dealStatusLabels, type DealDto, type DealStatus, type SellerDto } from "@kikos/shared";
 
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { getDealStatusChipSx } from "../../ui/status-chip";

@@ -31,7 +31,7 @@ import { useMemo, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import { HttpError } from "../../shared/api/http";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { getDealStatusChipSx } from "../../ui/status-chip";

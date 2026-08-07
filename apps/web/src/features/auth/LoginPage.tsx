@@ -8,7 +8,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import { HttpError } from "../../shared/api/http";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "./AuthContext";
 
 const loginFormSchema = z.object({
   email: z.string().trim().email("Informe um e-mail valido"),

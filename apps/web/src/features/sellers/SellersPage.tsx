@@ -7,7 +7,7 @@ import { useQueries } from "@tanstack/react-query";
 
 import type { DealDto, SellerDto } from "@kikos/shared";
 
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { formatCurrency } from "../../shared/utils/format";

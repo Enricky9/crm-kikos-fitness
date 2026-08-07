@@ -27,8 +27,8 @@ import {
 import { Link as RouterLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-import { useAuth } from "../auth/AuthContext";
 import { DashboardPage } from "../features/dashboard/DashboardPage";
+import { useAuth } from "../features/auth/AuthContext";
 import { CreateDealPage } from "../features/deals/CreateDealPage";
 import { DealBoardPage } from "../features/deals/DealBoardPage";
 import { DealDetailsPage } from "../features/deals/DealDetailsPage";

@@ -22,7 +22,7 @@ import type { z } from "zod";
 import { createDealSchema, dealStatusLabels, type CreateDealDto, type OpenDealStatus } from "@kikos/shared";
 
 import { HttpError } from "../../shared/api/http";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../auth/AuthContext";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { listLeadsRequest } from "../leads/leads-api";
 import { createDealRequest, listSellersRequest } from "./deals-api";
