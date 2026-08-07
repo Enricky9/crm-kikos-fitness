@@ -1,4 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
@@ -15,70 +14,40 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Controller, useForm } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { Link as RouterLink, useParams } from "react-router-dom";
-
-import { createCommentSchema, type CreateCommentDto } from "@kikos/shared";
 
 import { useAuth } from "../../features/auth/AuthContext";
 import { LeadDealsPanel } from "../../features/leads/components/lead-deals-panel";
 import { LeadDetailsSummary } from "../../features/leads/components/lead-details-summary";
-import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "../../features/leads/api/leads-api";
-import { HttpError } from "../../shared/api/http";
+import { useLeadDetails } from "../../features/leads/hooks/use-lead-details";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { formatDateTime } from "../../shared/utils/format";
 
-const getErrorMessage = (error: unknown, fallback: string) => {
-  if (error instanceof HttpError) {
-    return error.payload.error.message;
-  }
-
-  return fallback;
-};
-
 export const LeadDetailsPage = () => {
   const { leadId } = useParams<{ leadId: string }>();
   const { token } = useAuth();
-  const queryClient = useQueryClient();
-  const commentForm = useForm<CreateCommentDto>({
-    resolver: zodResolver(createCommentSchema),
-    defaultValues: {
-      content: ""
-    }
+  const {
+    addComment,
+    commentError,
+    commentForm,
+    comments,
+    deals,
+    isCommentPending,
+    isCommentsError,
+    isCommentsLoading,
+    isDealsError,
+    isDealsLoading,
+    isLeadError,
+    isLeadLoading,
+    lead
+  } = useLeadDetails({
+    leadId,
+    token
   });
 
-  const leadQuery = useQuery({
-    queryKey: ["lead", leadId],
-    queryFn: () => getLeadRequest(token ?? "", leadId ?? ""),
-    enabled: Boolean(token && leadId)
-  });
-
-  const [commentsQuery, dealsQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ["lead-comments", leadId],
-        queryFn: () => listLeadCommentsRequest(token ?? "", leadId ?? ""),
-        enabled: Boolean(token && leadId)
-      },
-      {
-        queryKey: ["lead-deals", leadId],
-        queryFn: () => listLeadDealsRequest(token ?? "", leadId ?? ""),
-        enabled: Boolean(token && leadId)
-      }
-    ]
-  });
-
-  const commentMutation = useMutation({
-    mutationFn: (input: CreateCommentDto) => createLeadCommentRequest(token ?? "", leadId ?? "", input),
-    onSuccess: () => {
-      commentForm.reset({ content: "" });
-      void queryClient.invalidateQueries({ queryKey: ["lead-comments", leadId] });
-    }
-  });
-
-  if (leadQuery.isLoading) {
+  if (isLeadLoading) {
     return (
       <Stack spacing={2}>
         <LoadingState blocks={[{ height: 48, width: 240 }, { height: 180 }]} />
@@ -86,17 +55,9 @@ export const LeadDetailsPage = () => {
     );
   }
 
-  if (leadQuery.isError || !leadQuery.data) {
+  if (isLeadError || !lead) {
     return <Alert severity="error">Nao foi possivel carregar o lead.</Alert>;
   }
-
-  const lead = leadQuery.data.lead;
-  const submitComment = commentForm.handleSubmit((values) => {
-    commentMutation.mutate(values);
-  });
-  const commentError = commentMutation.error
-    ? getErrorMessage(commentMutation.error, "Nao foi possivel adicionar o comentario.")
-    : null;
 
   return (
     <Stack spacing={3}>
@@ -145,7 +106,7 @@ export const LeadDetailsPage = () => {
                 component="form"
                 elevation={0}
                 onSubmit={(event) => {
-                  void submitComment(event);
+                  void addComment(event);
                 }}
                 sx={{ bgcolor: "#111115", border: 1, borderColor: "divider", p: 2 }}
               >
@@ -168,26 +129,26 @@ export const LeadDetailsPage = () => {
                   />
                   <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-end">
                     <Button
-                      disabled={commentMutation.isPending}
-                      startIcon={commentMutation.isPending ? <SaveIcon /> : <SendIcon />}
+                      disabled={isCommentPending}
+                      startIcon={isCommentPending ? <SaveIcon /> : <SendIcon />}
                       type="submit"
                       variant="contained"
                     >
-                      {commentMutation.isPending ? "Salvando..." : "Adicionar comentario"}
+                      {isCommentPending ? "Salvando..." : "Adicionar comentario"}
                     </Button>
                   </Stack>
                 </Stack>
               </Paper>
-              {commentsQuery.isLoading ? <LoadingState blocks={[{ height: 96 }]} /> : null}
-              {commentsQuery.isError ? <Alert severity="error">Nao foi possivel carregar os comentarios.</Alert> : null}
-              {commentsQuery.data?.comments.length === 0 ? (
+              {isCommentsLoading ? <LoadingState blocks={[{ height: 96 }]} /> : null}
+              {isCommentsError ? <Alert severity="error">Nao foi possivel carregar os comentarios.</Alert> : null}
+              {!isCommentsLoading && comments.length === 0 ? (
                 <EmptyState
                   description="Use o campo acima para registrar uma interacao com o lead."
                   title="Nenhum comentario registrado."
                 />
               ) : null}
               <List disablePadding>
-                {commentsQuery.data?.comments.map((comment) => (
+                {comments.map((comment) => (
                   <ListItem
                     alignItems="flex-start"
                     key={comment.id}
@@ -210,7 +171,7 @@ export const LeadDetailsPage = () => {
           </Paper>
         </Stack>
 
-        <LeadDealsPanel deals={dealsQuery.data?.data ?? []} isError={dealsQuery.isError} isLoading={dealsQuery.isLoading} />
+        <LeadDealsPanel deals={deals} isError={isDealsError} isLoading={isDealsLoading} />
       </Box>
     </Stack>
   );
