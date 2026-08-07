@@ -3,8 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthProvider } from "../features/auth/AuthContext";
-import { LoginPage } from "../features/auth/LoginPage";
 import { RequireAuth } from "../features/auth/RequireAuth";
+import { LoginPage } from "../pages/auth/LoginPage";
 import { AppShell } from "./AppShell";
 import { theme } from "./theme";
 

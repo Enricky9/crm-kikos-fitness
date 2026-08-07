@@ -7,11 +7,11 @@ import { useQueries } from "@tanstack/react-query";
 
 import type { DealDto, SellerDto } from "@kikos/shared";
 
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../../features/auth/AuthContext";
+import { listDealsRequest, listSellersRequest } from "../../features/deals/api/deals-api";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { formatCurrency } from "../../shared/utils/format";
-import { listDealsRequest, listSellersRequest } from "../deals/api/deals-api";
 
 export type SellerPerformanceRow = {
   readonly conversionRate: number;

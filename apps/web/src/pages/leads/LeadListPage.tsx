@@ -26,10 +26,10 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../../features/auth/AuthContext";
+import { listLeadsRequest } from "../../features/leads/api/leads-api";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { formatDateTime } from "../../shared/utils/format";
-import { listLeadsRequest } from "./api/leads-api";
 
 const pageSizeOptions = [10, 20, 50];
 

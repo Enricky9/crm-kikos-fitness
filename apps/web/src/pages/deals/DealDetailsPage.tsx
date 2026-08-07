@@ -32,11 +32,11 @@ import { Link as RouterLink, useParams } from "react-router-dom";
 
 import { createCommentSchema, dealStatusLabels, type CreateCommentDto, type DealDto, type DealStatus } from "@kikos/shared";
 
+import { useAuth } from "../../features/auth/AuthContext";
+import { getDealStatusChipSx } from "../../features/deals/components/deal-status-chip";
 import { HttpError } from "../../shared/api/http";
-import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { getDealStatusChipSx } from "./components/deal-status-chip";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
 import {
   changeDealStatusRequest,
@@ -45,7 +45,7 @@ import {
   loseDealRequest,
   reopenDealRequest,
   winDealRequest
-} from "./api/deals-api";
+} from "../../features/deals/api/deals-api";
 
 const statusOptions: Record<DealStatus, readonly DealStatus[]> = {
   NEW: ["NEW", "IN_PROGRESS", "LOST"],

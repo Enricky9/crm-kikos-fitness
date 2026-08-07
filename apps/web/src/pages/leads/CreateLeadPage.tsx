@@ -8,9 +8,9 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 import { createLeadSchema, type CreateLeadDto } from "@kikos/shared";
 
+import { useAuth } from "../../features/auth/AuthContext";
+import { createLeadRequest } from "../../features/leads/api/leads-api";
 import { HttpError } from "../../shared/api/http";
-import { useAuth } from "../auth/AuthContext";
-import { createLeadRequest } from "./api/leads-api";
 
 export const CreateLeadPage = () => {
   const { token } = useAuth();

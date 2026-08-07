@@ -30,13 +30,13 @@ import { dealStatusLabels } from "@kikos/shared";
 import { useMemo, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
+import { useAuth } from "../../features/auth/AuthContext";
+import { changeDealStatusRequest, listDealsRequest, loseDealRequest, winDealRequest } from "../../features/deals/api/deals-api";
+import { getDealStatusChipSx } from "../../features/deals/components/deal-status-chip";
 import { HttpError } from "../../shared/api/http";
-import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { getDealStatusChipSx } from "./components/deal-status-chip";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
-import { changeDealStatusRequest, listDealsRequest, loseDealRequest, winDealRequest } from "./api/deals-api";
 
 const boardStatuses = ["NEW", "IN_PROGRESS", "PROPOSAL", "WON", "LOST"] as const satisfies readonly DealStatus[];
 

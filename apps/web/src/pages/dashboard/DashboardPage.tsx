@@ -7,13 +7,13 @@ import { useQueries } from "@tanstack/react-query";
 
 import { dealStatusLabels, type DealDto, type DealStatus, type SellerDto } from "@kikos/shared";
 
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../../features/auth/AuthContext";
+import { listDealsRequest, listSellersRequest } from "../../features/deals/api/deals-api";
+import { getDealStatusChipSx } from "../../features/deals/components/deal-status-chip";
+import { listLeadsRequest } from "../../features/leads/api/leads-api";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { getDealStatusChipSx } from "../deals/components/deal-status-chip";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
-import { listDealsRequest, listSellersRequest } from "../deals/api/deals-api";
-import { listLeadsRequest } from "../leads/api/leads-api";
 
 const dashboardStatuses = ["NEW", "IN_PROGRESS", "PROPOSAL", "WON", "LOST"] as const satisfies readonly DealStatus[];
 

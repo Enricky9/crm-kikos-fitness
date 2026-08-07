@@ -22,13 +22,13 @@ import { Link as RouterLink, useParams } from "react-router-dom";
 
 import { createCommentSchema, dealStatusLabels, type CreateCommentDto } from "@kikos/shared";
 
+import { useAuth } from "../../features/auth/AuthContext";
+import { getDealStatusChipSx } from "../../features/deals/components/deal-status-chip";
+import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "../../features/leads/api/leads-api";
 import { HttpError } from "../../shared/api/http";
-import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { getDealStatusChipSx } from "../deals/components/deal-status-chip";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
-import { createLeadCommentRequest, getLeadRequest, listLeadCommentsRequest, listLeadDealsRequest } from "./api/leads-api";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof HttpError) {

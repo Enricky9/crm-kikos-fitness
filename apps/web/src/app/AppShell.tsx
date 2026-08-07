@@ -27,15 +27,15 @@ import {
 import { Link as RouterLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-import { DashboardPage } from "../features/dashboard/DashboardPage";
 import { useAuth } from "../features/auth/AuthContext";
-import { CreateDealPage } from "../features/deals/CreateDealPage";
-import { DealBoardPage } from "../features/deals/DealBoardPage";
-import { DealDetailsPage } from "../features/deals/DealDetailsPage";
-import { CreateLeadPage } from "../features/leads/CreateLeadPage";
-import { LeadDetailsPage } from "../features/leads/LeadDetailsPage";
-import { LeadListPage } from "../features/leads/LeadListPage";
-import { SellersPage } from "../features/sellers/SellersPage";
+import { DashboardPage } from "../pages/dashboard/DashboardPage";
+import { CreateDealPage } from "../pages/deals/CreateDealPage";
+import { DealBoardPage } from "../pages/deals/DealBoardPage";
+import { DealDetailsPage } from "../pages/deals/DealDetailsPage";
+import { CreateLeadPage } from "../pages/leads/CreateLeadPage";
+import { LeadDetailsPage } from "../pages/leads/LeadDetailsPage";
+import { LeadListPage } from "../pages/leads/LeadListPage";
+import { SellersPage } from "../pages/sellers/SellersPage";
 
 const sidebarWidth = 264;
 

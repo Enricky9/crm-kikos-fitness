@@ -7,8 +7,8 @@ import { Controller, useForm } from "react-hook-form";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
+import { useAuth } from "../../features/auth/AuthContext";
 import { HttpError } from "../../shared/api/http";
-import { useAuth } from "./AuthContext";
 
 const loginFormSchema = z.object({
   email: z.string().trim().email("Informe um e-mail valido"),
