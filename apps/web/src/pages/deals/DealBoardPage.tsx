@@ -33,36 +33,11 @@ import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../features/auth/AuthContext";
 import { changeDealStatusRequest, listDealsRequest, loseDealRequest, winDealRequest } from "../../features/deals/api/deals-api";
 import { getDealStatusChipSx } from "../../features/deals/components/deal-status-chip";
+import { boardStatuses, groupDealsByStatus, nextStatusOptions } from "../../features/deals/lib/deal-board";
 import { HttpError } from "../../shared/api/http";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
-
-const boardStatuses = ["NEW", "IN_PROGRESS", "PROPOSAL", "WON", "LOST"] as const satisfies readonly DealStatus[];
-
-const nextStatusOptions: Record<DealStatus, readonly DealStatus[]> = {
-  NEW: ["NEW", "IN_PROGRESS", "LOST"],
-  IN_PROGRESS: ["IN_PROGRESS", "NEW", "PROPOSAL", "WON", "LOST"],
-  PROPOSAL: ["PROPOSAL", "IN_PROGRESS", "WON", "LOST"],
-  WON: ["WON"],
-  LOST: ["LOST"]
-};
-
-type BoardData = Record<DealStatus, readonly DealDto[]>;
-
-const emptyBoard = (): BoardData => ({
-  NEW: [],
-  IN_PROGRESS: [],
-  PROPOSAL: [],
-  WON: [],
-  LOST: []
-});
-
-const groupDealsByStatus = (deals: readonly DealDto[]) =>
-  deals.reduce<BoardData>((board, deal) => {
-    board[deal.status] = [...board[deal.status], deal];
-    return board;
-  }, emptyBoard());
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof HttpError) {
