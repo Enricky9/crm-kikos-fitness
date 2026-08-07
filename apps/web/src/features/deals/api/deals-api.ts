@@ -3,6 +3,7 @@ import type {
   CommentDto,
   CreateDealDto,
   CreateCommentDto,
+  DealAiSummaryDto,
   DealDetailsDto,
   DealDto,
   DealListQuery,
@@ -101,5 +102,11 @@ export const createDealCommentRequest = (token: string, dealId: string, input: C
   apiRequest<{ comment: CommentDto }>(`/deals/${dealId}/comments`, {
     method: "POST",
     body: input,
+    token
+  });
+
+export const generateDealAiSummaryRequest = (token: string, dealId: string) =>
+  apiRequest<{ summary: DealAiSummaryDto }>(`/deals/${dealId}/ai-summary`, {
+    method: "POST",
     token
   });

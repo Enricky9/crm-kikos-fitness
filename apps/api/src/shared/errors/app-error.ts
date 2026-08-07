@@ -47,6 +47,12 @@ export class InvalidDealTransitionError extends AppError {
   }
 }
 
+export class AiSummaryUnavailableError extends AppError {
+  constructor() {
+    super("AI_SUMMARY_UNAVAILABLE", "Nao foi possivel gerar o resumo com IA", 503);
+  }
+}
+
 export class CommentTargetNotFoundError extends AppError {
   constructor() {
     super("VALIDATION_ERROR", "Lead ou negocio informado nao existe", 422);

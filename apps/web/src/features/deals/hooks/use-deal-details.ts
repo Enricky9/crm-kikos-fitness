@@ -1,13 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { createCommentSchema, type CreateCommentDto, type DealDto, type DealStatus } from "@kikos/shared";
+import { createCommentSchema, type CreateCommentDto, type DealAiSummaryDto, type DealDto, type DealStatus } from "@kikos/shared";
 
 import { HttpError } from "../../../shared/api/http";
 import {
   changeDealStatusRequest,
   createDealCommentRequest,
+  generateDealAiSummaryRequest,
   getDealRequest,
   loseDealRequest,
   reopenDealRequest,
@@ -24,6 +26,7 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 
 export const useDealDetails = ({ dealId, token }: { readonly dealId: string | undefined; readonly token: string | null }) => {
   const queryClient = useQueryClient();
+  const [aiSummary, setAiSummary] = useState<DealAiSummaryDto | null>(null);
   const commentForm = useForm<CreateCommentDto>({
     resolver: zodResolver(createCommentSchema),
     defaultValues: {
@@ -71,15 +74,30 @@ export const useDealDetails = ({ dealId, token }: { readonly dealId: string | un
     }
   });
 
+  const aiSummaryMutation = useMutation({
+    mutationFn: () => generateDealAiSummaryRequest(token ?? "", dealId ?? ""),
+    onSuccess: (result) => {
+      setAiSummary(result.summary);
+    }
+  });
+
   const mutationError = statusMutation.error ?? reopenMutation.error ?? commentMutation.error;
 
   return {
     addComment: commentForm.handleSubmit((values) => {
       commentMutation.mutate(values);
     }),
+    aiSummary,
+    aiSummaryErrorMessage: aiSummaryMutation.error
+      ? getErrorMessage(aiSummaryMutation.error, "Nao foi possivel gerar o resumo com IA.")
+      : null,
     commentForm,
     deal: dealQuery.data?.deal ?? null,
+    generateAiSummary: () => {
+      aiSummaryMutation.mutate();
+    },
     errorMessage: mutationError ? getErrorMessage(mutationError, "Nao foi possivel concluir a operacao.") : null,
+    isAiSummaryPending: aiSummaryMutation.isPending,
     isCommentPending: commentMutation.isPending,
     isDealError: dealQuery.isError,
     isDealLoading: dealQuery.isLoading,

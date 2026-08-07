@@ -14,6 +14,7 @@ CRM fullstack para gerenciamento de leads e oportunidades comerciais, desenvolvi
 - Transicoes de status validadas no backend.
 - Marcacao de negocio como ganho, perdido com motivo e reabertura explicita.
 - Historico de alteracao de status.
+- Resumo inteligente dos comentarios de um negocio com provider mock ou Gemini.
 - Swagger/OpenAPI em `/api/docs`.
 
 ## Stack
@@ -38,11 +39,10 @@ apps/
     src/shared/database
     src/shared/errors
   web/
-    src/auth
-    src/api
-    src/features/leads
-    src/features/deals
-    src/ui
+    src/app
+    src/features
+    src/pages
+    src/shared
 packages/
   shared/
 ```
@@ -129,8 +129,9 @@ JWT_SECRET=change-me-in-development
 JWT_EXPIRES_IN=8h
 CORS_ORIGIN=http://localhost:5173
 AI_PROVIDER=mock
-AI_API_KEY=
-AI_MODEL=
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-3.5-flash
+AI_TIMEOUT_MS=10000
 VITE_API_URL=http://localhost:3333/api/v1
 ```
 
@@ -191,6 +192,7 @@ Endpoints principais:
 - `POST /api/v1/deals/:dealId/win`
 - `POST /api/v1/deals/:dealId/lose`
 - `POST /api/v1/deals/:dealId/reopen`
+- `POST /api/v1/deals/:dealId/ai-summary`
 - `GET|POST /api/v1/deals/:dealId/comments`
 
 Documentacao:
@@ -209,7 +211,7 @@ pnpm test
 pnpm build
 ```
 
-O backend possui testes de rotas, autenticacao, leads, negocios, comentarios, autorizacao de vendedor e transicoes de status. O frontend ainda usa `vitest --passWithNoTests`; testes de interface com React Testing Library sao uma melhoria futura importante.
+O backend possui testes de rotas, autenticacao, leads, negocios, comentarios, autorizacao de vendedor, transicoes de status e resumo com IA. O frontend possui testes de calculos de dashboard/vendedores, regras do board e estados do resumo com IA.
 
 ## Tratamento de Erros
 
@@ -256,7 +258,23 @@ Ao mover um card por drag and drop ou seletor:
 
 ## IA Opcional
 
-As variaveis `AI_PROVIDER`, `AI_API_KEY` e `AI_MODEL` ja estao previstas no ambiente, mas o resumo com IA ainda nao foi implementado. A recomendacao e criar um provider mock e um provider real configuravel apenas depois de fechar os requisitos principais.
+O endpoint `POST /api/v1/deals/:dealId/ai-summary` gera um resumo dos comentarios do negocio autenticado. A tela de detalhes do negocio exibe a secao "Resumo com IA", com estados de carregamento, erro, sucesso e nova geracao.
+
+Providers disponiveis:
+
+- `AI_PROVIDER=mock`: padrao local, nao exige chave externa e retorna um resumo deterministico.
+- `AI_PROVIDER=gemini`: usa a Gemini API por REST.
+
+Variaveis para Gemini:
+
+```text
+AI_PROVIDER=gemini
+GEMINI_API_KEY=sua-chave
+GEMINI_MODEL=gemini-3.5-flash
+AI_TIMEOUT_MS=10000
+```
+
+Se `AI_PROVIDER=gemini` for configurado sem `GEMINI_API_KEY`, a API usa o provider mock para preservar a execucao local.
 
 ## Trade-offs e Limitacoes
 
@@ -281,4 +299,4 @@ As variaveis `AI_PROVIDER`, `AI_API_KEY` e `AI_MODEL` ja estao previstas no ambi
 - Testes frontend com React Testing Library.
 - Testes E2E com Playwright.
 - Deploy em AWS/Kubernetes.
-- Lead scoring ou resumo de comentarios com IA.
+- Lead scoring com IA.

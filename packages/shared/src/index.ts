@@ -25,6 +25,7 @@ export const apiErrorCodeSchema = z.enum([
   "DEAL_NOT_FOUND",
   "SELLER_NOT_FOUND",
   "INVALID_DEAL_TRANSITION",
+  "AI_SUMMARY_UNAVAILABLE",
   "VALIDATION_ERROR",
   "CONFLICT",
   "INTERNAL_SERVER_ERROR"
@@ -202,3 +203,10 @@ export const dealDetailsSchema = dealSchema.extend({
   statusHistory: z.array(dealStatusHistorySchema)
 });
 export type DealDetailsDto = z.infer<typeof dealDetailsSchema>;
+
+export const dealAiSummarySchema = z.object({
+  summary: z.string(),
+  provider: z.string(),
+  generatedAt: z.string()
+});
+export type DealAiSummaryDto = z.infer<typeof dealAiSummarySchema>;

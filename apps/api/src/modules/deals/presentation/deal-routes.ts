@@ -8,10 +8,12 @@ import { authenticateRequest } from "../../auth/presentation/authenticate-reques
 import { ValidationError } from "../../../shared/errors/app-error.js";
 import { runRouteEffect } from "../../../shared/http/run-route-effect.js";
 import type { DealService } from "../application/deal-service.js";
+import type { DealSummaryService } from "../application/deal-summary-service.js";
 
 type DealRoutesOptions = {
   readonly authService: AuthService;
   readonly dealService: DealService;
+  readonly dealSummaryService: DealSummaryService;
 };
 
 const paramsSchema = z.object({
@@ -20,7 +22,7 @@ const paramsSchema = z.object({
 
 export const registerDealRoutes: FastifyPluginCallback<DealRoutesOptions> = (
   server,
-  { authService, dealService },
+  { authService, dealService, dealSummaryService },
   done
 ) => {
   server.addHook("preHandler", async (request) => {
@@ -138,6 +140,18 @@ export const registerDealRoutes: FastifyPluginCallback<DealRoutesOptions> = (
 
     const deal = await runRouteEffect(dealService.reopen(parsedParams.data.dealId, user));
     return reply.send({ deal });
+  });
+
+  server.post("/:dealId/ai-summary", async (request, reply) => {
+    const user = await authenticateRequest(server, request, authService);
+    const parsedParams = paramsSchema.safeParse(request.params);
+
+    if (!parsedParams.success) {
+      throw new ValidationError(parsedParams.error.flatten());
+    }
+
+    const summary = await runRouteEffect(dealSummaryService.generate(parsedParams.data.dealId, user));
+    return reply.send({ summary });
   });
 
   done();

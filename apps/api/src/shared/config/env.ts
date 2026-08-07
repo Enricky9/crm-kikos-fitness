@@ -12,9 +12,10 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1).default("change-me-in-development"),
   JWT_EXPIRES_IN: z.string().min(1).default("8h"),
   CORS_ORIGIN: z.string().url().default("http://localhost:5173"),
-  AI_PROVIDER: z.enum(["mock", "openai"]).default("mock"),
-  AI_API_KEY: z.string().optional(),
-  AI_MODEL: z.string().optional()
+  AI_PROVIDER: z.enum(["mock", "gemini"]).default("mock"),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default("gemini-3.5-flash"),
+  AI_TIMEOUT_MS: z.coerce.number().int().positive().default(10000)
 });
 
 export const env = envSchema.parse(process.env);

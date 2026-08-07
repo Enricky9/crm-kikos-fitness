@@ -147,6 +147,16 @@ const statusHistorySchema: OpenAPIV3.SchemaObject = {
   }
 };
 
+const dealAiSummarySchema: OpenAPIV3.SchemaObject = {
+  type: "object",
+  required: ["summary", "provider", "generatedAt"],
+  properties: {
+    summary: { type: "string" },
+    provider: { type: "string", example: "mock" },
+    generatedAt: { type: "string", format: "date-time" }
+  }
+};
+
 const bearerSecurity: OpenAPIV3.SecurityRequirementObject[] = [{ bearerAuth: [] }];
 
 const errorResponses = {
@@ -201,6 +211,7 @@ const openApiDocument: OpenAPIV3.Document = {
       ErrorResponse: errorResponseSchema,
       Lead: leadSchema,
       Deal: dealSchema,
+      DealAiSummary: dealAiSummarySchema,
       Comment: commentSchema,
       Seller: sellerSchema,
       DealStatusHistory: statusHistorySchema,
@@ -484,6 +495,24 @@ const openApiDocument: OpenAPIV3.Document = {
     },
     "/api/v1/deals/{dealId}/reopen": {
       post: simpleDealAction("Reabre negocio fechado")
+    },
+    "/api/v1/deals/{dealId}/ai-summary": {
+      post: {
+        tags: ["Deals"],
+        summary: "Gera resumo inteligente dos comentarios do negocio",
+        security: bearerSecurity,
+        parameters: [uuidParam("dealId")],
+        responses: {
+          "200": objectResponse("Resumo gerado", {
+            type: "object",
+            required: ["summary"],
+            properties: {
+              summary: { $ref: "#/components/schemas/DealAiSummary" }
+            }
+          }),
+          ...errorResponses
+        }
+      }
     },
     "/api/v1/deals/{dealId}/comments": commentPath("dealId", "Deal")
   }

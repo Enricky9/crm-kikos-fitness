@@ -10,7 +10,10 @@ import type { CommentRepository } from "../modules/comments/application/ports/co
 import { createSequelizeCommentRepository } from "../modules/comments/infrastructure/persistence/sequelize/sequelize-comment-repository.js";
 import { registerCommentRoutes } from "../modules/comments/presentation/comment-routes.js";
 import type { DealRepository } from "../modules/deals/application/ports/deal-repository.js";
+import type { DealSummaryProvider } from "../modules/deals/application/ports/deal-summary-provider.js";
 import { createDealService } from "../modules/deals/application/deal-service.js";
+import { createDealSummaryService } from "../modules/deals/application/deal-summary-service.js";
+import { createDealSummaryProvider } from "../modules/deals/infrastructure/ai/deal-summary-provider-factory.js";
 import { createSequelizeDealRepository } from "../modules/deals/infrastructure/persistence/sequelize/sequelize-deal-repository.js";
 import { registerDealRoutes } from "../modules/deals/presentation/deal-routes.js";
 import { createLeadService } from "../modules/leads/application/lead-service.js";
@@ -29,6 +32,7 @@ type BuildServerOptions = {
   readonly leadRepository?: LeadRepository;
   readonly dealRepository?: DealRepository;
   readonly commentRepository?: CommentRepository;
+  readonly dealSummaryProvider?: DealSummaryProvider;
 };
 
 export const buildServer = async (options: BuildServerOptions = {}) => {
@@ -62,9 +66,11 @@ export const buildServer = async (options: BuildServerOptions = {}) => {
   const leadRepository = options.leadRepository ?? createSequelizeLeadRepository();
   const dealRepository = options.dealRepository ?? createSequelizeDealRepository();
   const commentRepository = options.commentRepository ?? createSequelizeCommentRepository();
+  const dealSummaryProvider = options.dealSummaryProvider ?? createDealSummaryProvider();
   const authService = createAuthService(userRepository);
   const leadService = createLeadService(leadRepository);
   const dealService = createDealService(dealRepository);
+  const dealSummaryService = createDealSummaryService(dealRepository, dealSummaryProvider);
   const commentService = createCommentService(commentRepository);
 
   await server.register(
@@ -87,7 +93,8 @@ export const buildServer = async (options: BuildServerOptions = {}) => {
       await apiRoutes.register(registerDealRoutes, {
         prefix: "/deals",
         authService,
-        dealService
+        dealService,
+        dealSummaryService
       });
       await apiRoutes.register(registerCommentRoutes, {
         prefix: "/deals/:dealId/comments",

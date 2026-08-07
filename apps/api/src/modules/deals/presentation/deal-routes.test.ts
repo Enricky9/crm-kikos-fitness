@@ -1,12 +1,14 @@
 import bcrypt from "bcryptjs";
 import { describe, expect, it } from "vitest";
 
-import type { AuthenticatedUser, DealDto, DealStatus } from "@kikos/shared";
+import { dealAiSummarySchema, type AuthenticatedUser, type CommentDto, type DealDto, type DealStatus } from "@kikos/shared";
+import { z } from "zod";
 
 import { buildServer } from "../../../app/server.js";
 import { LeadNotFoundError, SellerNotFoundError } from "../../../shared/errors/app-error.js";
 import type { UserRecord, UserRepository } from "../../users/application/ports/user-repository.js";
 import type { DealListResult, DealRepository } from "../application/ports/deal-repository.js";
+import type { DealSummaryProvider } from "../application/ports/deal-summary-provider.js";
 
 const adminUser: UserRecord = {
   id: "0f890ef6-af84-43e2-a536-146776d22b62",
@@ -42,6 +44,20 @@ const demoDeal: DealDto = {
     company: "Academia Forma Total"
   },
   seller: {
+    id: sellerUser.id,
+    name: sellerUser.name,
+    email: sellerUser.email
+  }
+};
+
+const demoComment: CommentDto = {
+  id: "a45f9da6-43b1-4e2a-86eb-31ed5d7c07f0",
+  content: "Cliente pediu uma proposta revisada com prazo de entrega.",
+  authorId: sellerUser.id,
+  leadId: null,
+  dealId: demoDeal.id,
+  createdAt: "2026-08-05T12:30:00.000Z",
+  author: {
     id: sellerUser.id,
     name: sellerUser.name,
     email: sellerUser.email
@@ -99,7 +115,7 @@ const createDealRepository = (initialDeal: DealDto = demoDeal): DealRepository =
   findById: (dealId, user) =>
     Promise.resolve(
       dealId === initialDeal.id && canUserSeeDeal(user, initialDeal)
-        ? { ...initialDeal, comments: [], statusHistory: [] }
+        ? { ...initialDeal, comments: [demoComment], statusHistory: [] }
         : null
     ),
   update: (dealId, input, user) =>
@@ -141,13 +157,27 @@ const createDealRepositoryWithCreateError = (error: Error): DealRepository => ({
 const canUserSeeDeal = (user: AuthenticatedUser, deal: DealDto) =>
   user.role === "ADMIN" || user.id === deal.sellerId;
 
+const createSummaryProvider = (): DealSummaryProvider => ({
+  summarize: ({ comments }) =>
+    Promise.resolve({
+      provider: "mock",
+      summary: `Resumo gerado para ${comments.length} comentario(s).`
+    })
+});
+
+const createFailingSummaryProvider = (): DealSummaryProvider => ({
+  summarize: () => Promise.reject(new Error("AI provider unavailable"))
+});
+
 const buildAuthenticatedServer = async (
   currentUser: UserRecord = adminUser,
-  dealRepository: DealRepository = createDealRepository()
+  dealRepository: DealRepository = createDealRepository(),
+  dealSummaryProvider: DealSummaryProvider = createSummaryProvider()
 ) => {
   const server = await buildServer({
     userRepository: createUserRepository(currentUser),
-    dealRepository
+    dealRepository,
+    dealSummaryProvider
   });
   const token = server.jwt.sign({ sub: currentUser.id });
 
@@ -271,8 +301,74 @@ describe("deal routes", () => {
     expect(response.json()).toEqual({
       deal: {
         ...demoDeal,
-        comments: [],
+        comments: [demoComment],
         statusHistory: []
+      }
+    });
+  });
+
+  it("generates an AI summary for a deal", async () => {
+    const { server, authorization } = await buildAuthenticatedServer();
+
+    const response = await server.inject({
+      method: "POST",
+      url: `/api/v1/deals/${demoDeal.id}/ai-summary`,
+      headers: { authorization }
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body: unknown = response.json();
+    const parsedBody = z.object({ summary: dealAiSummarySchema }).parse(body);
+
+    expect(parsedBody).toMatchObject({
+      summary: {
+        provider: "mock",
+        summary: "Resumo gerado para 1 comentario(s)."
+      }
+    });
+  });
+
+  it("returns not found when generating a summary for a hidden deal", async () => {
+    const otherSeller: UserRecord = {
+      ...sellerUser,
+      id: "227d6eb3-f68a-40df-90e9-e83cf3a2ee5d",
+      email: "other.seller@kikos.local"
+    };
+    const { server, authorization } = await buildAuthenticatedServer(otherSeller);
+
+    const response = await server.inject({
+      method: "POST",
+      url: `/api/v1/deals/${demoDeal.id}/ai-summary`,
+      headers: { authorization }
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "DEAL_NOT_FOUND"
+      }
+    });
+  });
+
+  it("returns a controlled error when AI summary generation fails", async () => {
+    const { server, authorization } = await buildAuthenticatedServer(
+      adminUser,
+      createDealRepository(),
+      createFailingSummaryProvider()
+    );
+
+    const response = await server.inject({
+      method: "POST",
+      url: `/api/v1/deals/${demoDeal.id}/ai-summary`,
+      headers: { authorization }
+    });
+
+    expect(response.statusCode).toBe(503);
+    expect(response.json()).toEqual({
+      error: {
+        code: "AI_SUMMARY_UNAVAILABLE",
+        message: "Nao foi possivel gerar o resumo com IA",
+        details: null
       }
     });
   });

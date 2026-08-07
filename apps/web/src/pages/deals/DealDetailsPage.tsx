@@ -26,6 +26,7 @@ import { Link as RouterLink, useParams } from "react-router-dom";
 import type { DealStatus } from "@kikos/shared";
 
 import { useAuth } from "../../features/auth/AuthContext";
+import { DealAiSummaryPanel } from "../../features/deals/components/deal-ai-summary-panel";
 import { DealDetailsSummary } from "../../features/deals/components/deal-details-summary";
 import { DealStatusHistory } from "../../features/deals/components/deal-status-history";
 import { useDealDetails } from "../../features/deals/hooks/use-deal-details";
@@ -40,9 +41,13 @@ export const DealDetailsPage = () => {
   const [lostReason, setLostReason] = useState("");
   const {
     addComment,
+    aiSummary,
+    aiSummaryErrorMessage,
     commentForm,
     deal,
     errorMessage,
+    generateAiSummary,
+    isAiSummaryPending,
     isCommentPending,
     isDealError,
     isDealLoading,
@@ -240,7 +245,15 @@ export const DealDetailsPage = () => {
           </Paper>
         </Stack>
 
-        <DealStatusHistory history={deal.statusHistory} />
+        <Stack spacing={2}>
+          <DealAiSummaryPanel
+            errorMessage={aiSummaryErrorMessage}
+            isPending={isAiSummaryPending}
+            onGenerate={generateAiSummary}
+            summary={aiSummary}
+          />
+          <DealStatusHistory history={deal.statusHistory} />
+        </Stack>
       </Box>
 
       <Dialog
