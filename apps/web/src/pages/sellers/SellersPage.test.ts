@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { DealDto, SellerDto } from "@kikos/shared";
 
-import { buildSellerPerformanceRows, getSellerTotals } from "./SellersPage";
+import { buildSellerPerformanceRows, getSellerTotals } from "../../features/sellers/lib/seller-performance";
 
 const sellerA: SellerDto = {
   email: "ana@example.com",
