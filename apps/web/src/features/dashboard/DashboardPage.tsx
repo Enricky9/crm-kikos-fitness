@@ -10,7 +10,7 @@ import { dealStatusLabels, type DealDto, type DealStatus, type SellerDto } from 
 import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { getDealStatusChipSx } from "../../ui/status-chip";
+import { getDealStatusChipSx } from "../deals/components/deal-status-chip";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
 import { listDealsRequest, listSellersRequest } from "../deals/deals-api";
 import { listLeadsRequest } from "../leads/leads-api";

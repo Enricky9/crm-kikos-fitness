@@ -36,7 +36,7 @@ import { HttpError } from "../../shared/api/http";
 import { useAuth } from "../auth/AuthContext";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { getDealStatusChipSx } from "../../ui/status-chip";
+import { getDealStatusChipSx } from "./components/deal-status-chip";
 import { formatCurrency, formatDateTime } from "../../shared/utils/format";
 import {
   changeDealStatusRequest,
