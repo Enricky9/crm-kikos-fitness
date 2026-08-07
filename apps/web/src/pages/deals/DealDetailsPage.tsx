@@ -8,19 +8,14 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
-  InputLabel,
   List,
   ListItem,
   ListItemText,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TextField,
   Typography
@@ -30,14 +25,15 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link as RouterLink, useParams } from "react-router-dom";
 
-import { createCommentSchema, dealStatusLabels, type CreateCommentDto, type DealDto, type DealStatus } from "@kikos/shared";
+import { createCommentSchema, type CreateCommentDto, type DealDto, type DealStatus } from "@kikos/shared";
 
 import { useAuth } from "../../features/auth/AuthContext";
-import { getDealStatusChipSx } from "../../features/deals/components/deal-status-chip";
+import { DealDetailsSummary } from "../../features/deals/components/deal-details-summary";
+import { DealStatusHistory } from "../../features/deals/components/deal-status-history";
 import { HttpError } from "../../shared/api/http";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { formatCurrency, formatDateTime } from "../../shared/utils/format";
+import { formatDateTime } from "../../shared/utils/format";
 import {
   changeDealStatusRequest,
   createDealCommentRequest,
@@ -46,14 +42,6 @@ import {
   reopenDealRequest,
   winDealRequest
 } from "../../features/deals/api/deals-api";
-
-const statusOptions: Record<DealStatus, readonly DealStatus[]> = {
-  NEW: ["NEW", "IN_PROGRESS", "LOST"],
-  IN_PROGRESS: ["IN_PROGRESS", "NEW", "PROPOSAL", "WON", "LOST"],
-  PROPOSAL: ["PROPOSAL", "IN_PROGRESS", "WON", "LOST"],
-  WON: ["WON"],
-  LOST: ["LOST"]
-};
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof HttpError) {
@@ -222,67 +210,12 @@ export const DealDetailsPage = () => {
         }}
       >
         <Stack spacing={2}>
-          <Paper
-            elevation={0}
-            sx={{
-              bgcolor: "background.paper",
-              border: 1,
-              borderColor: "divider",
-              boxShadow: "0 18px 44px rgba(0, 0, 0, 0.22)",
-              p: { xs: 2, md: 3 }
-            }}
-          >
-            <Stack spacing={2}>
-              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-                <Chip label={dealStatusLabels[deal.status]} sx={getDealStatusChipSx(deal.status)} variant="outlined" />
-                <Chip
-                  label={formatCurrency(Number(deal.value))}
-                  sx={{ bgcolor: "rgba(154, 154, 165, 0.12)", color: "text.primary" }}
-                  variant="outlined"
-                />
-              </Stack>
-
-              <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
-                {deal.description ?? "Sem descricao."}
-              </Typography>
-
-              {deal.lostReason ? <Alert severity="warning">Motivo da perda: {deal.lostReason}</Alert> : null}
-
-              <Box
-                sx={{
-                  display: "grid",
-                  gap: 1.5,
-                  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" }
-                }}
-              >
-                <Info label="Lead" value={deal.lead?.name ?? "-"} />
-                <Info label="Empresa" value={deal.lead?.company ?? "-"} />
-                <Info label="Vendedor" value={deal.seller?.name ?? "-"} />
-                <Info label="Criado em" value={formatDateTime(deal.createdAt)} />
-                <Info label="Atualizado em" value={formatDateTime(deal.updatedAt)} />
-                <Info label="Fechado em" value={deal.closedAt ? formatDateTime(deal.closedAt) : "-"} />
-              </Box>
-
-              <FormControl fullWidth sx={{ maxWidth: 360 }}>
-                <InputLabel id="deal-status-label">Alterar status</InputLabel>
-                <Select
-                  disabled={statusMutation.isPending || isClosed}
-                  label="Alterar status"
-                  labelId="deal-status-label"
-                  onChange={(event) => {
-                    handleStatusChange(event.target.value as DealStatus);
-                  }}
-                  value={deal.status}
-                >
-                  {statusOptions[deal.status].map((status) => (
-                    <MenuItem key={status} value={status}>
-                      {dealStatusLabels[status]}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Stack>
-          </Paper>
+          <DealDetailsSummary
+            deal={deal}
+            isClosed={isClosed}
+            isStatusPending={statusMutation.isPending}
+            onStatusChange={handleStatusChange}
+          />
 
           <Paper
             elevation={0}
@@ -366,58 +299,7 @@ export const DealDetailsPage = () => {
           </Paper>
         </Stack>
 
-        <Paper
-          elevation={0}
-          sx={{
-            bgcolor: "background.paper",
-            border: 1,
-            borderColor: "divider",
-            p: { xs: 2, md: 3 },
-            position: { lg: "sticky" },
-            top: { lg: 24 }
-          }}
-        >
-          <Stack spacing={2}>
-            <Typography component="h2" variant="h6">
-              Historico de status
-            </Typography>
-            {deal.statusHistory.length === 0 ? (
-              <EmptyState minHeight={96} title="Nenhum historico registrado." />
-            ) : null}
-            <List disablePadding>
-              {deal.statusHistory.map((history) => (
-                <ListItem
-                  disableGutters
-                  key={history.id}
-                  sx={{
-                    alignItems: "flex-start",
-                    gap: 1.5,
-                    py: 1.25
-                  }}
-                >
-                  <Box
-                    aria-hidden
-                    sx={{
-                      bgcolor: "primary.main",
-                      borderRadius: "50%",
-                      boxShadow: "0 0 0 5px rgba(255, 77, 45, 0.12)",
-                      flexShrink: 0,
-                      height: 8,
-                      mt: 1,
-                      width: 8
-                    }}
-                  />
-                  <ListItemText
-                    primary={`${history.fromStatus ? dealStatusLabels[history.fromStatus] : "Criacao"} -> ${
-                      dealStatusLabels[history.toStatus]
-                    }`}
-                    secondary={`${history.changedByUser?.name ?? "Usuario"} - ${formatDateTime(history.createdAt)}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Stack>
-        </Paper>
+        <DealStatusHistory history={deal.statusHistory} />
       </Box>
 
       <Dialog
@@ -459,23 +341,3 @@ export const DealDetailsPage = () => {
     </Stack>
   );
 };
-
-const Info = ({ label, value }: { readonly label: string; readonly value: string }) => (
-  <Box
-    sx={{
-      bgcolor: "#111115",
-      border: 1,
-      borderColor: "divider",
-      borderRadius: 1,
-      minWidth: 0,
-      p: 1.5
-    }}
-  >
-    <Typography color="text.secondary" variant="body2">
-      {label}
-    </Typography>
-    <Typography fontWeight={700} noWrap>
-      {value}
-    </Typography>
-  </Box>
-);
