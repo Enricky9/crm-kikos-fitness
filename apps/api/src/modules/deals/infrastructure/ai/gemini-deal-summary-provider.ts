@@ -63,7 +63,10 @@ export const createGeminiDealSummaryProvider = ({
               }
             ],
             generationConfig: {
-              maxOutputTokens: 300
+              maxOutputTokens: 1024,
+              thinkingConfig: {
+                thinkingLevel: "low"
+              }
             }
           }),
           headers: {

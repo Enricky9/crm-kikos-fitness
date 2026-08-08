@@ -15,7 +15,7 @@ const envSchema = z.object({
   AI_PROVIDER: z.enum(["mock", "gemini"]).default("mock"),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default("gemini-3.5-flash"),
-  AI_TIMEOUT_MS: z.coerce.number().int().positive().default(10000)
+  AI_TIMEOUT_MS: z.coerce.number().int().positive().default(30000)
 });
 
 export const env = envSchema.parse(process.env);

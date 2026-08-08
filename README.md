@@ -131,7 +131,7 @@ CORS_ORIGIN=http://localhost:5173
 AI_PROVIDER=mock
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-3.5-flash
-AI_TIMEOUT_MS=10000
+AI_TIMEOUT_MS=30000
 VITE_API_URL=http://localhost:3333/api/v1
 ```
 
@@ -271,7 +271,7 @@ Variaveis para Gemini:
 AI_PROVIDER=gemini
 GEMINI_API_KEY=sua-chave
 GEMINI_MODEL=gemini-3.5-flash
-AI_TIMEOUT_MS=10000
+AI_TIMEOUT_MS=30000
 ```
 
 Se `AI_PROVIDER=gemini` for configurado sem `GEMINI_API_KEY`, a API usa o provider mock para preservar a execucao local.
