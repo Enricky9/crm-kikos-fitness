@@ -63,8 +63,7 @@ export const createGeminiDealSummaryProvider = ({
               }
             ],
             generationConfig: {
-              maxOutputTokens: 300,
-              temperature: 0.2
+              maxOutputTokens: 300
             }
           }),
           headers: {
