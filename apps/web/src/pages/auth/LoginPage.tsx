@@ -91,7 +91,7 @@ export const LoginPage = () => {
                   fullWidth
                   helperText={fieldState.error?.message}
                   label="E-mail"
-                  placeholder="admin@kikos.local"
+                  placeholder="seu.email@empresa.com"
                   type="email"
                 />
               )}
@@ -124,27 +124,6 @@ export const LoginPage = () => {
             >
               {form.formState.isSubmitting ? "Entrando..." : "Entrar"}
             </Button>
-          </Stack>
-
-          <Stack
-            spacing={0.5}
-            sx={{
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 2,
-              bgcolor: "rgba(14, 14, 18, 0.74)",
-              p: 2
-            }}
-          >
-            <Typography color="text.secondary" variant="caption">
-              Acesso demonstrativo
-            </Typography>
-            <Typography fontWeight={700} variant="body2">
-              admin@kikos.local
-            </Typography>
-            <Typography color="text.secondary" variant="body2">
-              Admin123!
-            </Typography>
           </Stack>
         </Stack>
       </Paper>
